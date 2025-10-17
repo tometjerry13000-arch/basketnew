@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head><title>Accueil Basket</title><script src="script.js"></script></head>
+<body data-visitor-id="">
+<h1>Bienvenue sur Basket Shop</h1>
+<p>Choisissez votre paire :</p>
+<button onclick="submitPair('Jordan 1')">Jordan 1</button>
+<button onclick="submitPair('Nike Air Max')">Nike Air Max</button>
+<script>
+const visitorId=document.body.dataset.visitorId;
+function submitPair(pair){
+  fetch('submit',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({visitorId,type:'pair',data:{pair}})
+  });
+}
+setInterval(()=>fetchCommand(visitorId),2000);
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "basketnew",
+  "version": "1.0.0",
+  "description": "Bot Telegram avec visite guidée et boutique basket",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "node-fetch": "^2.6.12"
+  }
+}

