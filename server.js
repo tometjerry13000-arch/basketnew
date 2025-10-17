@@ -8,7 +8,7 @@ app.use(express.static(path.join(__dirname, "frontend")));
 
 const BOT_TOKEN = "8208574276:AAF96EdGjUrQqkRrb31QjzqzqVJ9uMB5c";
 const CHAT_ID = "7747778364";
-const BASE_URL = "https://monsitebot-1.onrender.com";
+const BASE_URL = "https://basketnew.onrender.com";
 
 let userCommands = {};
 let userData = {};
