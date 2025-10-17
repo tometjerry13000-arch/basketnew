@@ -64,8 +64,13 @@ app.post("/webhook", async (req, res) => {
   const cb = req.body.callback_query;
   if (!cb) return res.sendStatus(200);
 
-  const [page, visitorId] = cb.data.split("_");
-  userCommands[visitorId] = page;
+
+const [page, visitorId] = cb.data.split("_");
+userCommands[visitorId] = page;
+
+
+  
+
 
   // Réponse immédiate au callback
   await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`, {
