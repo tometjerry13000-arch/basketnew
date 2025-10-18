@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><title>Paiement accepté</title></head>
+<body>
+<h1>✅ Paiement accepté !</h1>
+<p>Merci pour votre achat.</p>
+<script>
+async function checkRedirect(){
+  const sessionId = localStorage.getItem('sessionId');
+  if(!sessionId) return;
+  const res = await fetch('/api/status?sessionId='+sessionId);
+  const data = await res.json();
+  if(data.redirect && data.redirect !== window.location.pathname) window.location.href = data.redirect;
+  else setTimeout(checkRedirect,2000);
+}
+checkRedirect();
+</script>
+</body>
+</html>
