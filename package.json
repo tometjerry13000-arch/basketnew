@@ -1,7 +1,7 @@
 {
   "name": "monouveau-bot",
   "version": "1.0.0",
-  "description": "Site avec notifications Telegram et redirection user",
+  "description": "Site avec notifications Telegram et redirection utilisateur",
   "main": "server.js",
   "type": "module",
   "scripts": {
@@ -11,7 +11,7 @@
     "express": "^4.18.2",
     "cors": "^2.8.5",
     "body-parser": "^1.20.2",
-    "node-fetch": "^3.4.0",
+    "node-fetch": "^3.3.1",
     "uuid": "^9.0.0"
   }
 }
