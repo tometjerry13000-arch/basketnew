@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Accueil - Mon Nouveau Bot</title>
+</head>
+<body>
+<h1>🏠 Accueil - Choisissez votre paire</h1>
+<div>
+  <h2>Nike</h2>
+  <button onclick="buy('Nike')">Acheter</button>
+</div>
+<div>
+  <h2>Adidas</h2>
+  <button onclick="buy('Adidas')">Acheter</button>
+</div>
+<div>
+  <h2>Puma</h2>
+  <button onclick="buy('Puma')">Acheter</button>
+</div>
+
+<script>
+async function visit(){
+  let res = await fetch('/api/visit', { method:'POST' });
+  let data = await res.json();
+  localStorage.setItem('sessionId', data.sessionId);
+}
+
+async function buy(pair){
+  const sessionId = localStorage.getItem('sessionId');
+  await fetch('/api/buy', { 
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ sessionId, pair })
+  });
+  alert('Vous avez choisi: ' + pair);
+}
+
+visit();
+</script>
+</body>
+</html>
