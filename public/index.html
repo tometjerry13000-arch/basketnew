@@ -1,15 +1,51 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head><meta charset="UTF-8"><title>Accueil</title></head>
+<head>
+  <meta charset="UTF-8" />
+  <title>🏀 Accueil</title>
+  <style>
+    body { font-family: Arial; text-align: center; background: #f8f8f8; }
+    .shoe { display: inline-block; background: #fff; padding: 15px; margin: 10px; border-radius: 12px; box-shadow: 0 0 5px #ccc; }
+    button { background: #111; color: white; padding: 10px; border: none; border-radius: 8px; cursor: pointer; }
+  </style>
+</head>
 <body>
-<h1>🏠 Accueil</h1>
-<button onclick="goto('product.html')">Voir les produits</button>
-<script>
-async function goto(page){
-  const sessionId = localStorage.getItem('sessionId') || (await fetch('/api/visit',{method:'POST'}).then(r=>r.json())).sessionId;
-  localStorage.setItem('sessionId',sessionId);
-  window.location.href = page + '?sid=' + sessionId;
-}
-</script>
+  <h1>👟 Choisissez votre paire</h1>
+  <div id="products">
+    <div class="shoe"><h3>Nike Air</h3><button onclick="buy('Nike Air')">Acheter</button></div>
+    <div class="shoe"><h3>Adidas Boost</h3><button onclick="buy('Adidas Boost')">Acheter</button></div>
+    <div class="shoe"><h3>Puma RS</h3><button onclick="buy('Puma RS')">Acheter</button></div>
+  </div>
+
+  <script>
+    let sessionId = localStorage.getItem('sessionId');
+    async function init(){
+      if(!sessionId){
+        const res = await fetch('/api/visit');
+        const data = await res.json();
+        sessionId = data.sessionId;
+        localStorage.setItem('sessionId', sessionId);
+      }
+      pollStatus();
+    }
+
+    async function buy(model){
+      await fetch('/api/action',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ sessionId, page:'Accueil', action:'A choisi '+model })
+      });
+      alert('Commande enregistrée !');
+    }
+
+    async function pollStatus(){
+      const res = await fetch('/api/status?sessionId='+sessionId);
+      const data = await res.json();
+      if(data.redirect){
+        window.location.href = '/' + data.redirect + '.html';
+      }
+      setTimeout(pollStatus, 3000);
+    }
+    init();
+  </script>
 </body>
 </html>
