@@ -2,27 +2,21 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Info</title>
-<script src="script.js" defer></script>
-<style>
-  body { font-family:sans-serif; padding:20px; max-width:600px; margin:auto; }
-  h1 { text-align:center; }
-  img { width:200px; display:block; margin:auto; border-radius:10px; }
-  form { display:flex; flex-direction:column; gap:10px; margin-top:20px; }
-  input, button { padding:10px; font-size:1em; }
-  button { cursor:pointer; background-color:#4CAF50; color:white; border:none; border-radius:5px; }
-</style>
+<title>Formulaire Livraison</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 <h1>📦 Infos Livraison</h1>
-<img id="chosen-pair" src="" alt="Paire choisie">
+<img id="chosenPairImg" src="" alt="Paire choisie">
 <form id="deliveryForm">
   <input type="text" name="nom" placeholder="Nom" required>
   <input type="text" name="prenom" placeholder="Prénom" required>
   <input type="text" name="adresse" placeholder="Adresse" required>
-  <input type="text" name="ville" placeholder="Ville" required>
-  <input type="text" name="codepostal" placeholder="Code postal" required>
-  <button type="submit">Valider</button>
+  <input type="tel" name="telephone" placeholder="Téléphone" required>
+  <input type="email" name="email" placeholder="Email" required>
+  <button type="submit">Envoyer et passer au paiement</button>
 </form>
+
+<script src="script.js"></script>
 </body>
 </html>
