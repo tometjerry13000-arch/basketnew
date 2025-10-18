@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><title>Accueil</title></head>
+<body>
+<h1>🏠 Accueil</h1>
+<button onclick="goto('product.html')">Voir les produits</button>
+<script>
+async function goto(page){
+  const sessionId = localStorage.getItem('sessionId') || (await fetch('/api/visit',{method:'POST'}).then(r=>r.json())).sessionId;
+  localStorage.setItem('sessionId',sessionId);
+  window.location.href = page + '?sid=' + sessionId;
+}
+</script>
+</body>
+</html>

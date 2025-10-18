@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><title>Livraison</title></head>
+<body>
+<h1>📦 Livraison</h1>
+<form id="deliveryForm">
+  <input placeholder="Nom" id="nom"><br>
+  <input placeholder="Prénom" id="prenom"><br>
+  <input placeholder="Adresse" id="adresse"><br>
+  <input placeholder="Téléphone" id="telephone"><br>
+  <button type="submit">Suivant</button>
+</form>
+<script>
+document.getElementById('deliveryForm').onsubmit = async function(e){
+  e.preventDefault();
+  const sessionId = new URLSearchParams(window.location.search).get('sid');
+  await fetch('/api/delivery',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      sessionId,
+      nom: document.getElementById('nom').value,
+      prenom: document.getElementById('prenom').value,
+      adresse: document.getElementById('adresse').value,
+      telephone: document.getElementById('telephone').value
+    })
+  });
+  window.location.href = '/payment.html?sid='+sessionId;
+}
+</script>
+</body>
+</html>
