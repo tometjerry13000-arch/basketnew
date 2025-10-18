@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><title>Accueil</title></head>
+<body>
+<h1>🏠 Accueil</h1>
+<button onclick="visit()">Visiter</button>
+<script>
+async function visit(){
+  let res = await fetch('/api/visit',{method:'POST'});
+  let data = await res.json();
+  localStorage.setItem('sessionId', data.sessionId);
+  window.location.href = '/product.html';
+}
+</script>
+</body>
+</html>

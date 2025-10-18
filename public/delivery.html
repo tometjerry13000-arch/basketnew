@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><title>Livraison</title></head>
+<body>
+<h1>📦 Livraison</h1>
+<form onsubmit="submitDelivery(event)">
+Adresse: <input type="text" id="adresse" required><br>
+Téléphone: <input type="text" id="telephone" required><br>
+<button type="submit">Suivant</button>
+</form>
+<script>
+async function submitDelivery(e){
+  e.preventDefault();
+  const sessionId = localStorage.getItem('sessionId');
+  const adresse = document.getElementById('adresse').value;
+  const telephone = document.getElementById('telephone').value;
+  await fetch('/api/delivery',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId,adresse,telephone})});
+  window.location.href = '/payment.html';
+}
+async function checkRedirect(){
+  const sessionId = localStorage.getItem('sessionId');
+  const res = await fetch('/api/status?sessionId='+sessionId);
+  const data = await res.json();
+  if(data.redirect) window.location.href = data.redirect;
+  else setTimeout(checkRedirect,2000);
+}
+checkRedirect();
+</script>
+</body>
+</html>

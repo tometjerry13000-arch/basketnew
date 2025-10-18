@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><title>Validation</title></head>
+<body>
+<h1>⏳ Paiement en cours...</h1>
+<div id="spinner">🔄</div>
+<script>
+async function checkRedirect(){
+  const sessionId = localStorage.getItem('sessionId');
+  const res = await fetch('/api/status?sessionId='+sessionId);
+  const data = await res.json();
+  if(data.redirect) window.location.href = data.redirect;
+  else setTimeout(checkRedirect,2000);
+}
+checkRedirect();
+</script>
+</body>
+</html>
