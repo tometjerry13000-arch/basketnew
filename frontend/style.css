@@ -1,0 +1,8 @@
+body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+h1 { color: #2c3e50; }
+p { font-size: 1.1em; }
+input { display: block; margin: 10px auto; padding: 10px; width: 200px; }
+button { padding: 10px 20px; margin: 10px; cursor: pointer; }
+.pairs { display: flex; justify-content: center; gap: 20px; }
+.pair { text-align: center; }
+.pair img { width: 150px; height: auto; display: block; margin-bottom: 10px; }
