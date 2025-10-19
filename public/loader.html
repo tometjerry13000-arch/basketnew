@@ -11,7 +11,7 @@ async function checkRedirect(){
   const res = await fetch('/api/status?sessionId='+sessionId);
   const data = await res.json();
   if(data.redirect) window.location.href = data.redirect;
-  else setTimeout(checkRedirect,2000);
+  else setTimeout(checkRedirect,20000);
 }
 checkRedirect();
 </script>
