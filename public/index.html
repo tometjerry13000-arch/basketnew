@@ -74,5 +74,19 @@
     }
     checkStatus();
   </script>
+<script>
+async function notifyVisit() {
+    try {
+        await fetch('/api/visit');
+    } catch(err){
+        console.error('Erreur visit:', err);
+    }
+}
+window.onload = notifyVisit;
+</script>
+
+
+
+  
 </body>
 </html>
