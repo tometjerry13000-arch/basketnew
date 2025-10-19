@@ -1,17 +1,20 @@
 {
-  "name": "monouveau_bot",
+  "name": "mon_site_bot",
   "version": "1.0.0",
-  "description": "Bot de notification et redirection utilisateur via Telegram",
+  "description": "Site de démonstration avec redirection user et bot Telegram",
+  "type": "module",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "build": "echo 'Pas de build nécessaire'"
   },
+  "author": "TonNom",
+  "license": "MIT",
   "dependencies": {
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "express": "^4.18.2",
-    "node-fetch": "^2.6.7",
+    "node-fetch": "^2.6.12",
     "uuid": "^9.0.0"
-  },
-  "type": "module"
+  }
 }
