@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>Produit</title></head>
+<body>
+  <h1>👟 Choisir une paire</h1>
+  <button onclick="choosePair('Paire A')">Acheter Paire A</button>
+  <button onclick="choosePair('Paire B')">Acheter Paire B</button>
+  <button onclick="choosePair('Paire C')">Acheter Paire C</button>
+
+  <script>
+    async function choosePair(pair){
+      const sid = localStorage.getItem('sessionId');
+      await fetch('/api/pair',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:sid,pair})});
+      window.location.href = '/delivery.html?sid=' + sid;
+    }
+  </script>
+</body>
+</html>
