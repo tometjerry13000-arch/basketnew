@@ -1,17 +1,17 @@
 {
   "name": "monouveau_bot",
   "version": "1.0.0",
-  "description": "Site basket avec notifications Telegram",
+  "description": "Bot de notification et redirection utilisateur via Telegram",
   "main": "server.js",
-  "type": "module",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
+    "express": "^4.18.2",
     "node-fetch": "^2.6.7",
     "uuid": "^9.0.0"
-  }
+  },
+  "type": "module"
 }
