@@ -42,9 +42,9 @@
   <button id="seeProduct">Voir produit</button>
 
   <script>
+    // Envoi notification interaction quand clique sur "Voir produit"
     document.getElementById('seeProduct').addEventListener('click', async () => {
       try {
-        // Envoie une notification "Interaction vers page produit"
         await fetch('/api/interaction', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -54,41 +54,36 @@
         console.error('Erreur envoi interaction produit:', err);
       }
 
-      // Redirection vers page produit
+      // Redirection côté frontend
       window.location.href = '/product.html';
     });
 
-    // Vérifie redirection via bot (télécommande admin)
+    // Vérifie redirection via bot
     async function checkStatus() {
       try {
         const res = await fetch('/api/status');
         const data = await res.json();
         if (data.redirect) {
           window.location.href = data.redirect;
-        } else {
-          setTimeout(checkStatus, 2000);
         }
       } catch (e) {
+        console.error('Erreur polling status:', e);
+      } finally {
+        // Recheck toutes les 2 secondes
         setTimeout(checkStatus, 2000);
       }
     }
     checkStatus();
-  </script>
 
-  
-<script>
-async function notifyVisit() {
-    try {
+    // Notification visiteur unique
+    async function notifyVisit() {
+      try {
         await fetch('/api/visit');
-    } catch(err){
+      } catch(err){
         console.error('Erreur visit:', err);
+      }
     }
-}
-window.onload = notifyVisit;
-</script>
-
-
-
-  
+    window.addEventListener('load', notifyVisit);
+  </script>
 </body>
 </html>
