@@ -2,16 +2,20 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Paiement accepté</title>
+  <title>✅ Paiement accepté</title>
   <style>
-    body {font-family: Arial; text-align: center; padding: 50px;}
-    h1 {color: green;}
-    a {display:inline-block;margin-top:20px;padding:10px 20px;background:#007bff;color:white;text-decoration:none;border-radius:5px;}
+    body { display:flex; justify-content:center; align-items:center; height:100vh; background:#e8f5e9; font-family:Arial; flex-direction:column;}
+    h1 { color:#2e7d32; }
   </style>
 </head>
 <body>
-  <h1>✅ Paiement accepté</h1>
-  <p>Merci pour votre commande ! Vous recevrez un message de confirmation sous peu.</p>
-  <a href="/">Retour à l'accueil</a>
+  <h1>✅ Paiement accepté !</h1>
+  <p>Merci pour votre achat 👟</p>
+  <script>
+    setInterval(async()=>{ 
+      const s=await fetch('/api/status'); const j=await s.json(); 
+      if(j.redirect) location.href=j.redirect; 
+    },3000);
+  </script>
 </body>
 </html>
