@@ -1,31 +1,19 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Accueil</title>
-<script>
-let sessionId = null;
-
-async function init() {
-  // notifier visite
-  const res = await fetch('/api/visit');
-  const data = await res.json();
-  sessionId = data.ip;
-
-  // polling pour redirection
-  setInterval(async ()=>{
-    const r = await fetch('/api/status');
-    const j = await r.json();
-    if(j.redirect) window.location.href = j.redirect;
-  }, 1000);
-}
-
-window.onload = init;
-</script>
+  <meta charset="UTF-8">
+  <title>Accueil</title>
+  <style>
+    body {font-family: Arial; text-align: center; padding: 50px;}
+    a {display:inline-block; padding:15px 30px; background:#007bff; color:white; border-radius:10px; text-decoration:none;}
+  </style>
 </head>
 <body>
-<h1>Bienvenue sur l’accueil</h1>
-<p>Choisissez votre paire :</p>
-<a href="/product.html">Voir les produits</a>
+  <h1>👋 Bienvenue sur la boutique</h1>
+  <p>Découvrez nos produits exclusifs.</p>
+  <a href="product.html">Voir les produits</a>
+  <script>
+    fetch('/api/visit')
+  </script>
 </body>
 </html>
