@@ -1,21 +1,22 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Chargement paiement</title>
+<title>Loader</title>
 <style>
-  body {display:flex;justify-content:center;align-items:center;height:100vh;}
-  .spinner {width:80px;height:80px;border:10px solid #ccc;border-top:10px solid #4CAF50;border-radius:50%;animation:spin 1s linear infinite;}
-  @keyframes spin {0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+  body{display:flex;justify-content:center;align-items:center;height:100vh;}
+  .spinner{border:8px solid #f3f3f3;border-top:8px solid #3498db;border-radius:50%;width:80px;height:80px;animation:spin 1s linear infinite;}
+  @keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
 </style>
 </head>
 <body>
 <div class="spinner"></div>
 <script>
 async function poll(){
-  const session = await fetch('/api/status').then(r=>r.json());
-  if(session.redirect){
-    window.location.href = session.redirect;
+  const res = await fetch('/api/status');
+  const json = await res.json();
+  if(json.redirect){
+    window.location.href = json.redirect;
   } else {
     setTimeout(poll,1000);
   }
