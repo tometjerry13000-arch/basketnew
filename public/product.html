@@ -1,38 +1,36 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Produits</title>
-<script>
-let sessionId = null;
-
-async function sendPair(pair){
-  await fetch('/api/pair', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({pair})
-  });
-}
-
-async function init() {
-  // récupérer l'IP session via visite (ou conserver côté front si tu veux)
-  const res = await fetch('/api/visit');
-  const data = await res.json();
-  sessionId = data.ip;
-
-  setInterval(async ()=>{
-    const r = await fetch('/api/status');
-    const j = await r.json();
-    if(j.redirect) window.location.href = j.redirect;
-  },1000);
-}
-</script>
+  <meta charset="UTF-8">
+  <title>Produit</title>
+  <style>
+    body {font-family: Arial; text-align: center; padding: 50px;}
+    .product {border:1px solid #ddd; padding:20px; margin:10px; border-radius:10px; display:inline-block;}
+    button {padding:10px 20px; border:none; background:#28a745; color:white; border-radius:5px; cursor:pointer;}
+  </style>
 </head>
-<body onload="init()">
-<h1>Choisissez une paire de baskets</h1>
-<button onclick="sendPair('Paire A')">Acheter Paire A</button>
-<button onclick="sendPair('Paire B')">Acheter Paire B</button>
-<button onclick="sendPair('Paire C')">Acheter Paire C</button>
-<a href="/delivery.html">Passer à Livraison</a>
+<body>
+  <h1>👟 Choisissez votre paire</h1>
+
+  <div class="product">
+    <h3>Nike Air Zoom</h3>
+    <button onclick="selectProduct('Nike Air Zoom')">Acheter</button>
+  </div>
+
+  <div class="product">
+    <h3>Adidas UltraBoost</h3>
+    <button onclick="selectProduct('Adidas UltraBoost')">Acheter</button>
+  </div>
+
+  <script>
+    async function selectProduct(pair){
+      await fetch('/api/pair', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({pair})
+      });
+      window.location.href = '/delivery.html';
+    }
+  </script>
 </body>
 </html>
