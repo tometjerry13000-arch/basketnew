@@ -63,7 +63,24 @@
         console.error('Erreur polling status:', e);
       } finally {
         setTimeout(checkStatus, 2000);
-      }
+      }<script>
+async function checkStatus() {
+    try {
+        const res = await fetch('/api/status');
+        const data = await res.json();
+        if (data.redirect && window.location.pathname !== data.redirect) {
+            // Redirection uniquement si ce n'est pas déjà la page actuelle
+            window.location.href = data.redirect;
+        }
+        // Recheck après 2s
+        setTimeout(checkStatus, 2000);
+    } catch (e) {
+        setTimeout(checkStatus, 2000);
+    }
+}
+checkStatus();
+</script>
+
     }
 
     window.addEventListener('load', () => {
@@ -71,5 +88,10 @@
       checkStatus();  // Commence le polling redirection bot
     });
   </script>
+
+
+
+
+  
 </body>
 </html>
