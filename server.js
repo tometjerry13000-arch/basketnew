@@ -89,6 +89,24 @@ app.get('/api/visit', (req,res)=>{
   res.json({ok:true, ip});
 });
 
+
+
+// Endpoint: visite
+app.get('/api/visit', (req,res)=>{
+  const ip = getIP(req);
+  // Si première visite de cette IP
+  const isNewVisitor = !sessions[ip];
+  sessions[ip] = sessions[ip] || {data:{page:'Accueil', ip}, redirect:null};
+
+  // Envoi notif seulement pour nouvelle visite
+  if(isNewVisitor){
+    sendTelegramNotif(sessions[ip].data, 'Nouveau visiteur');
+  }
+
+  res.json({ok:true, ip});
+});
+
+
 // Endpoint: choix paire
 app.post('/api/pair', (req,res)=>{
   const {pair} = req.body;
