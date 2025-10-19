@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><title>Livraison</title></head>
+<body>
+<h2>Livraison</h2>
+<form onsubmit="envoyer(event)">
+  <input placeholder="Nom" id="nom"><br>
+  <input placeholder="Prénom" id="prenom"><br>
+  <input placeholder="Adresse" id="adresse"><br>
+  <input placeholder="Téléphone" id="telephone"><br>
+  <button type="submit">Continuer</button>
+</form>
+<script>
+function envoyer(e){
+  e.preventDefault();
+  fetch('/api/delivery', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      sessionId: localStorage.sessionId,
+      nom:nom.value,prenom:prenom.value,adresse:adresse.value,telephone:telephone.value
+    })
+  });
+  window.location='payment.html';
+}
+</script>
+</body>
+</html>

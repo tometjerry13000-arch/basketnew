@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>Accueil - Baskets</title>
+<style>
+body { font-family: Arial; text-align: center; background: #f9f9f9; }
+.container { display: flex; justify-content: center; gap: 30px; margin-top: 50px; }
+.card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+button { background: #2b71f7; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
+</style>
+<script>
+fetch('/api/visit', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+</script>
+</head>
+<body>
+<h1>👟 Nos Baskets</h1>
+<div class="container">
+  <div class="card"><img src="https://via.placeholder.com/150"><h3>Air Max</h3><button onclick="window.location='product.html'">Acheter</button></div>
+  <div class="card"><img src="https://via.placeholder.com/150"><h3>Yeezy</h3><button onclick="window.location='product.html'">Acheter</button></div>
+  <div class="card"><img src="https://via.placeholder.com/150"><h3>Jordan</h3><button onclick="window.location='product.html'">Acheter</button></div>
+</div>
+</body>
+</html>

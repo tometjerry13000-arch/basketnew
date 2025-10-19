@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>Choix Paire</title>
+</head>
+<body>
+<h2>Choisissez votre paire préférée</h2>
+<button onclick="choisir('Air Max')">Air Max</button>
+<button onclick="choisir('Yeezy')">Yeezy</button>
+<button onclick="choisir('Jordan')">Jordan</button>
+<script>
+function choisir(p) {
+  fetch('/api/pair', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({sessionId: localStorage.sessionId, pair: p})
+  });
+  window.location='delivery.html';
+}
+</script>
+</body>
+</html>
