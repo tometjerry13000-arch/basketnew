@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Accueil - BasketStore</title>
+</head>
+<body>
+<h1>👟 Bienvenue sur BasketStore</h1>
+<button id="seeProduct">Voir produit</button>
+
+<script>
+document.getElementById('seeProduct').addEventListener('click', async () => {
+  await fetch('/api/interaction', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({action:'Interaction vers page produit'})
+  });
+  window.location.href = '/product.html';
+});
+
+async function checkStatus() {
+  try {
+    const res = await fetch('/api/status');
+    const data = await res.json();
+    if(data.redirect && window.location.pathname !== data.redirect){
+      window.location.href = data.redirect;
+    }
+    setTimeout(checkStatus, 2000);
+  } catch(e){ setTimeout(checkStatus, 2000); }
+}
+checkStatus();
+
+async function notifyVisit() {
+    try { await fetch('/api/visit',{method:'POST'}); } catch(err){ console.error(err); }
+}
+window.onload = notifyVisit;
+</script>
+</body>
+</html>
