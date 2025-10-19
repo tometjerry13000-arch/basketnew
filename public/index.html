@@ -1,87 +1,92 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Accueil</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Accueil - BasketStore</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+      text-align: center;
+      padding: 60px 20px;
+    }
+    h1 {
+      color: #222;
+      font-size: 2em;
+      margin-bottom: 20px;
+    }
+    p {
+      font-size: 1.2em;
+      color: #444;
+      margin-bottom: 40px;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 15px 25px;
+      font-size: 1.1em;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
 </head>
 <body>
-<h1>🏀 Bienvenue sur Basket Shop</h1>
-<button id="btnProduct">Voir produit</button>
-
-<script>
-async function notifyVisit(){
-    const res = await fetch('/api/visit');
-    const data = await res.json();
-    console.log('Visite notifiée', data);
-}
-notifyVisit();
-
-document.getElementById('btnProduct').addEventListener('click',()=>{
-    window.location.href='/product.html';
-});
-
-// Polling redirection bot
-async function pollRedirect(){
-    const res = await fetch('/api/status');
-    const data = await res.json();
-    if(data.redirect && window.location.pathname !== data.redirect){
-        window.location.href = data.redirect;
-    }
-    setTimeout(pollRedirect,1000);
-}
-pollRedirect();
-</script>
+  <h1>👟 Bienvenue sur BasketStore</h1>
+  <p>Découvrez nos nouvelles paires exclusives.</p>
+  <button id="seeProduct">Voir produit</button>
 
   <script>
-    // Fonction pour notifier la visite du site
-    async function notifyVisit() {
-      try {
-        await fetch('/api/visit', { method: 'POST' }); // POST à chaque accès
-      } catch(err){
-        console.error('Erreur visite:', err);
-      }
-    }
-
-    // Notification clic sur "Voir produit"
     document.getElementById('seeProduct').addEventListener('click', async () => {
       try {
+        // Envoie une notification "Interaction vers page produit"
         await fetch('/api/interaction', {
           method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({action:'Interaction vers page produit'})
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'Interaction vers page produit' })
         });
-      } catch(err){
-        console.error('Erreur interaction produit:', err);
+      } catch (err) {
+        console.error('Erreur envoi interaction produit:', err);
       }
-      // Redirection côté frontend
+
+      // Redirection vers page produit
       window.location.href = '/product.html';
     });
 
-    // Vérification des redirections bot en continu
+    // Vérifie redirection via bot (télécommande admin)
     async function checkStatus() {
       try {
         const res = await fetch('/api/status');
         const data = await res.json();
-        if(data.redirect){
+        if (data.redirect) {
           window.location.href = data.redirect;
+        } else {
+          setTimeout(checkStatus, 2000);
         }
-      } catch(e){
-        console.error('Erreur polling status:', e);
-      } finally {
+      } catch (e) {
         setTimeout(checkStatus, 2000);
       }
     }
-
-    window.addEventListener('load', () => {
-      notifyVisit();  // Envoi notif visiteur
-      checkStatus();  // Commence le polling redirection bot
-    });
+    checkStatus();
   </script>
+<script>
+async function notifyVisit() {
+    try {
+        await fetch('/api/visit');
+    } catch(err){
+        console.error('Erreur visit:', err);
+    }
+}
+window.onload = notifyVisit;
+</script>
 
 
 
-
-
-    
+  
 </body>
 </html>
