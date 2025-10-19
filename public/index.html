@@ -4,26 +4,28 @@
 <meta charset="UTF-8">
 <title>Accueil</title>
 <script>
-async function visit() {
+let sessionId = null;
+
+async function init() {
+  // notifier visite
   const res = await fetch('/api/visit');
-  window.sessionId = (await res.json()).sessionId;
-  checkRedirect();
-}
-async function checkRedirect() {
-  if(!window.sessionId) return;
-  const res = await fetch('/api/status?sessionId=' + window.sessionId);
   const data = await res.json();
-  if(data.redirect){
-    window.location.href = data.redirect;
-  } else {
-    setTimeout(checkRedirect, 1000);
-  }
+  sessionId = data.ip;
+
+  // polling pour redirection
+  setInterval(async ()=>{
+    const r = await fetch('/api/status');
+    const j = await r.json();
+    if(j.redirect) window.location.href = j.redirect;
+  }, 1000);
 }
-window.onload = visit;
+
+window.onload = init;
 </script>
 </head>
 <body>
-<h1>Accueil</h1>
-<a href="/product.html">➡️ Voir les produits</a>
+<h1>Bienvenue sur l’accueil</h1>
+<p>Choisissez votre paire :</p>
+<a href="/product.html">Voir les produits</a>
 </body>
 </html>
