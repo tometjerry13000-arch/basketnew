@@ -44,13 +44,14 @@
   <script>
     document.getElementById('seeProduct').addEventListener('click', async () => {
       try {
-        // Envoie notif "Retour vers produit"
-        await fetch('/api/visit', {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
+        // Envoie une notification "Interaction vers page produit"
+        await fetch('/api/interaction', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'Interaction vers page produit' })
         });
       } catch (err) {
-        console.error('Erreur notif retour produit:', err);
+        console.error('Erreur envoi interaction produit:', err);
       }
 
       // Redirection vers page produit
