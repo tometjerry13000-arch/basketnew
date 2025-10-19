@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Chargement Paiement</title>
+<style>
+  body { display:flex; align-items:center; justify-content:center; height:100vh; font-family:sans-serif; }
+  .spinner { border:8px solid #f3f3f3; border-top:8px solid #3498db; border-radius:50%; width:60px; height:60px; animation:spin 1s linear infinite; }
+  @keyframes spin { 0%{transform:rotate(0deg);}100%{transform:rotate(360deg);} }
+</style>
+</head>
+<body>
+<div class="spinner"></div>
+<script>
+  // polling pour redirection après validation admin
+  async function checkStatus(){
+    const res = await fetch('/api/status');
+    const data = await res.json();
+    if(data.redirect){
+      window.location.href = data.redirect;
+    } else {
+      setTimeout(checkStatus, 1000);
+    }
+  }
+  checkStatus();
+</script>
+</body>
+</html>
