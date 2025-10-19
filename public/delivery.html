@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Livraison</title>
+</head>
+<body>
+<h1>Formulaire Livraison</h1>
+<form id="deliveryForm">
+<input type="text" name="nom" placeholder="Nom" required><br>
+<input type="text" name="prenom" placeholder="Prénom" required><br>
+<input type="text" name="adresse" placeholder="Adresse" required><br>
+<input type="text" name="telephone" placeholder="Téléphone" required><br>
+<button type="submit">Suivant</button>
+</form>
+<script>
+document.getElementById('deliveryForm').onsubmit = async e => {
+  e.preventDefault();
+  const f = e.target;
+  await fetch('/api/delivery', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      sessionId: window.sessionId,
+      nom: f.nom.value,
+      prenom: f.prenom.value,
+      adresse: f.adresse.value,
+      telephone: f.telephone.value
+    })
+  });
+  window.location.href = '/payment.html';
+}
+</script>
+</body>
+</html>

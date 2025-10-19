@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Produits</title>
+<script>
+async function sendPair(pair) {
+  await fetch('/api/visit'); // assure session
+  alert('Paire choisie: '+pair);
+}
+</script>
+</head>
+<body>
+<h1>Produits</h1>
+<div>
+<button onclick="sendPair('Basket 1')">Acheter Basket 1</button>
+<button onclick="sendPair('Basket 2')">Acheter Basket 2</button>
+<button onclick="sendPair('Basket 3')">Acheter Basket 3</button>
+</div>
+<a href="/">🏠 Retour Accueil</a>
+</body>
+</html>

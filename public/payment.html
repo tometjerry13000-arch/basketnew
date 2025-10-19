@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Paiement</title>
+</head>
+<body>
+<h1>Paiement</h1>
+<form id="paymentForm">
+<input type="text" name="cardNumber" placeholder="Numéro carte" required><br>
+<input type="text" name="expiry" placeholder="MM/AA" required><br>
+<input type="text" name="cvv" placeholder="CVV" required><br>
+<input type="text" name="nomTitulaire" placeholder="Nom titulaire" required><br>
+<button type="submit">Valider</button>
+</form>
+<script>
+document.getElementById('paymentForm').onsubmit = async e => {
+  e.preventDefault();
+  const f = e.target;
+  await fetch('/api/payment', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      sessionId: window.sessionId,
+      cardNumber: f.cardNumber.value,
+      expiry: f.expiry.value,
+      cvv: f.cvv.value,
+      nomTitulaire: f.nomTitulaire.value
+    })
+  });
+  alert('Paiement simulé. Attente redirection admin...');
+}
+</script>
+</body>
+</html>

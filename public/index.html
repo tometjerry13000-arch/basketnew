@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Accueil</title>
+<script>
+async function visit() {
+  const res = await fetch('/api/visit');
+  window.sessionId = (await res.json()).sessionId;
+  checkRedirect();
+}
+async function checkRedirect() {
+  if(!window.sessionId) return;
+  const res = await fetch('/api/status?sessionId=' + window.sessionId);
+  const data = await res.json();
+  if(data.redirect){
+    window.location.href = data.redirect;
+  } else {
+    setTimeout(checkRedirect, 1000);
+  }
+}
+window.onload = visit;
+</script>
+</head>
+<body>
+<h1>Accueil</h1>
+<a href="/product.html">➡️ Voir les produits</a>
+</body>
+</html>
