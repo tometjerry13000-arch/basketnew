@@ -79,7 +79,14 @@ async function sendTelegramNotif(data) {
 }
 
 // 🟢 Routes API
-
+app.post('/api/interaction', async (req, res) => {
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const { action } = req.body || {};
+  if (!sessions[ip]) sessions[ip] = { data: { page: 'Accueil', ip }, redirect: null };
+  sessions[ip].data.page = action || 'Interaction utilisateur';
+  await sendTelegramNotif(sessions[ip].data);
+  res.json({ ok: true });
+});
 // Visite initiale
 app.get('/api/visit', (req, res) => {
   const ip = getIP(req);
