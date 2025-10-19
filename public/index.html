@@ -31,10 +31,16 @@ async function checkStatus() {
 }
 checkStatus();
 
-async function notifyVisit() {
-    try { await fetch('/api/visit',{method:'POST'}); } catch(err){ console.error(err); }
+async function notifyVisit(){
+    const res = await fetch('/api/visit');
+    const data = await res.json();
+    console.log('Visite notifiée', data);
 }
-window.onload = notifyVisit;
+notifyVisit();
+
+document.getElementById('btnProduct').addEventListener('click',()=>{
+    window.location.href='/product.html';
+});
 </script>
 </body>
 </html>
